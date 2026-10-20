@@ -1423,79 +1423,98 @@ async function genDescription(){
       docContents.push({name, text:text.slice(0,1000), images});
     }
 
-    status.textContent='Generando descripción con IA...';
+    status.textContent='Construyendo descripción...';
 
-    // ── Build message content array (text + images) ──────────────────────
     const currentDesc=document.getElementById('f-desc').value.trim();
-    const ref=INFORME1_REF[activeN]||'';
+    const cfg=gc();
 
-    const systemPrompt=`Eres el asistente de LELIO EDUARDO ACERO PINTO, Contador Público contratista de la Dirección de Talento Humano de la Gobernación de Casanare, Contrato 1681 de 2026.
+    // ── Smart local template generation ─────────────────────────────────
+    // Extract key references from document names and text
+    const allText=docContents.map(d=>d.name+' '+d.text).join(' ');
 
-Tu tarea es redactar la descripción técnica de la Obligación No. ${activeN} para el informe mensual de actividades.
+    // Detect document numbers, dates, names from extracted text
+    function findAll(text, rx){ return [...new Set((text.match(rx)||[]).map(m=>m.trim()))]; }
 
-OBLIGACIÓN No. ${activeN}: ${o.tx}
+    const memos   = findAll(allText, /MEMORANDO[^\d]*\d{3,4}/gi).map(m=>m.replace(/\s+/g,' '));
+    const oficios  = findAll(allText, /OFICIO[^\d]*(?:No\.?\s*)?\d{3,4}/gi).map(m=>m.replace(/\s+/g,' '));
+    const certs    = findAll(allText, /CERTIFICACI[OÓ]N[^\d]*\d{3,4}/gi).map(m=>m.replace(/\s+/g,' '));
+    const pqrsds   = findAll(allText, /(?:PQRSD|PETICI[OÓ]N)[^\d]*[\d.]{4,}/gi).map(m=>m.replace(/\s+/g,' '));
+    const actas    = findAll(allText, /ACTA[^\d]*\d{3,4}/gi).map(m=>m.replace(/\s+/g,' '));
+    const resols   = findAll(allText, /RESOLUCI[OÓ]N[^\d]*\d{3,4}/gi).map(m=>m.replace(/\s+/g,' '));
+    const allDocs2 = [...memos,...oficios,...certs,...pqrsds,...actas,...resols];
 
-REFERENCIA INFORME No. 1 (usa exactamente este tono y estilo):
-${ref}
+    // Extract dates
+    const dates = findAll(allText, /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/gi);
 
-${currentDesc?`DESCRIPCIÓN YA ESCRITA (complementa o mejora):\n${currentDesc}\n`:''}
+    // Extract names (uppercase sequences)
+    const names = findAll(allText, /[A-ZÁÉÍÓÚÑ]{3,}\s+[A-ZÁÉÍÓÚÑ]{3,}(?:\s+[A-ZÁÉÍÓÚÑ]{3,})?/g)
+      .filter(n=>!['DURANTE','PERÍODO','REPORTADO','DIRECCIÓN','GOBERNACIÓN',
+                    'MINISTERIO','HACIENDA','PASIVOCOL','CASANARE','TALENTO',
+                    'HUMANO','CONTRATO','INFORME','ACTIVIDADES'].includes(n))
+      .slice(0,3);
 
-REGLAS ESTRICTAS:
-- Primera persona activa: "elaboré", "verifiqué", "radicé", "identifiqué", "revisé"
-- Inicia con "Durante el período reportado,"
-- Específico: extrae y menciona números de documentos, fechas, nombres, valores que veas
-- Conciso: máximo 6 líneas
-- Tono profesional técnico
-- SOLO la descripción, sin títulos ni encabezados`;
+    // Extract monetary values
+    const values = findAll(allText, /\$[\d.,]+|\d{1,3}(?:[.,]\d{3})+/g).slice(0,3);
 
-    // Build content array: text prompt + document images
-    const contentArray=[{type:'text',text:systemPrompt}];
+    // Detected doc labels
+    const docLabels=assignedDocs.map(d=>d.detected||d.name);
 
-    // Add text extractions as part of the prompt
-    let docsText='\n\nDOCUMENTOS DE SOPORTE:\n';
-    for(const dc of docContents){
-      docsText+=`\n--- ${dc.name} ---\n${dc.text}\n`;
+    // ── Build description based on obligation type ────────────────────────
+    const periodo=cfg.d&&cfg.h?`${cfg.d} al ${cfg.h}`:'el período reportado';
+    let generated='';
+
+    // Verb patterns per obligation
+    const verbos={
+      1:'brindé acompañamiento profesional en la validación, depuración y actualización de las historias laborales en PASIVOCOL',
+      2:'estructuré y preparé los archivos planos y soportes técnicos requeridos por el aplicativo PASIVOCOL',
+      3:'gestioné la consolidación de la documentación requerida para el cálculo actuarial',
+      4:'realicé la revisión, verificación y validación técnica de la liquidación de nómina y prestaciones sociales',
+      5:'revisé y validé los conceptos que afectan la nómina: retención en la fuente, aportes SSS y parafiscales',
+      6:'contribuí en la depuración de la base gravable aplicando los procedimientos 1 y 2 de retención en la fuente',
+      7:'elaboré y proyecté los siguientes documentos administrativos',
+      8:'respondí de manera oportuna y técnica las solicitudes y requerimientos recibidos',
+      9:'ejecuté el procedimiento integral de gestión del aplicativo PASIVOCOL versión 6.0',
+      10:'elaboré y presenté el informe mensual de actividades con las evidencias documentales correspondientes',
+      11:'atendí las actividades adicionales asignadas por la supervisora del contrato',
+    };
+
+    generated=`Durante el período reportado, ${verbos[activeN]||'realicé las actividades correspondientes a esta obligación'}.`;
+
+    // Add document references
+    if(allDocs2.length>0){
+      generated+=`\n\nSoportes elaborados y radicados: ${allDocs2.join(', ')}.`;
+    } else if(docLabels.length>0){
+      generated+=`\n\nSoportes documentales: ${docLabels.join(' | ')}.`;
     }
-    contentArray[0].text+=docsText;
 
-    // Add images (vision)
-    for(const dc of docContents){
-      for(const img of dc.images){
-        contentArray.push({
-          type:'image',
-          source:{type:'base64',media_type:img.type,data:img.data}
-        });
-      }
+    // Add names if found and relevant
+    if(names.length>0 && [1,2,3,7,8,9].includes(activeN)){
+      generated+=`\nFuncionarios o personas relacionadas: ${names.join(', ')}.`;
     }
 
-    const response=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:500,
-        messages:[{role:'user',content:contentArray}]
-      })
-    });
+    // Add values if found and relevant (nómina obligations)
+    if(values.length>0 && [4,5,6].includes(activeN)){
+      generated+=`\nValores verificados: ${values.join(', ')}.`;
+    }
 
-    if(!response.ok) throw new Error('API error: '+response.status);
-    const data=await response.json();
-    const generated=data.content?.[0]?.text||'';
+    // Add dates if found
+    if(dates.length>0){
+      generated+=`\nFecha(s) de gestión: ${dates.slice(0,2).join(', ')}.`;
+    }
 
-    if(generated){
-      // Append to existing description or replace if empty
-      const textarea=document.getElementById('f-desc');
-      if(currentDesc){
-        textarea.value=currentDesc+'\n\n'+generated;
-      } else {
-        textarea.value=generated;
-      }
-      status.textContent='✓ Descripción generada — revisa y ajusta si es necesario';
-      status.style.color='var(--vd)';
-      toast('✓ Descripción generada con IA');
+    // Add reference from Informe No. 1 as continuation hint
+    generated+=`\n\n[Complementa con los detalles específicos del período ${periodo}]`;
+
+    // Update textarea
+    const textarea=document.getElementById('f-desc');
+    if(currentDesc){
+      textarea.value=currentDesc+'\n\n'+generated;
     } else {
-      throw new Error('Respuesta vacía');
+      textarea.value=generated;
     }
+    status.textContent='✓ Plantilla generada — completa los detalles específicos del período';
+    status.style.color='var(--vd)';
+    toast('✓ Descripción generada — revisa y ajusta');
   }catch(e){
     status.textContent='Error al generar: '+e.message;
     status.style.color='var(--rd)';
