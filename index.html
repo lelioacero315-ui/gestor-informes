@@ -1668,97 +1668,87 @@ async function genDescription(){
       const t=raw.toUpperCase();
       const nameUp=detected.toUpperCase();
 
-      // ── CERTIFICADO ESTADO CÉDULA (Registraduría Nacional) ────────────
-      // Estructura real: labels en bloque, valores en bloque separado posterior
+      // ── CERTIFICADO ESTADO CÉDULA (Registraduría Nacional) ─────────
+      // Estructura confirmada: labels en bloque, valores debajo separados por \n
       if(t.includes('REGISTRADUR')&&t.includes('ESTADO CIVIL')&&t.includes('CERTIFICA')){
-        const codVer=(raw.match(/verificaci[oó]n\s*\n(\d{8,12})/)||
-                      raw.match(/consulte \((\d{8,12})\)/)||[])[1]||'';
-        const valBlock=(raw.split(/ESTA CERTIFICACI[O\u00d3]N/i)[0]||raw);
-        const valLines=valBlock.split('\n').map(l=>l.trim()).filter(l=>
-          l&&!l.endsWith(':')&&!l.includes('CERTIFICA')&&!l.includes('REGISTRADUR')&&
-          !l.includes('presenta')&&!l.includes('verificaci')&&l!==''&&l.length>2);
-        const cIdx=valLines.findIndex(l=>/^\d{2,3}\.\d{3}/.test(l));
-        const cedula=cIdx>=0?valLines[cIdx]:'';
-        const fechaExp=cIdx>=0?valLines[cIdx+1]||'':'';
-        const lugar=cIdx>=0?valLines[cIdx+2]||'':'';
-        const nombre=cIdx>=0?valLines[cIdx+3]||'':'';
-        const estado=cIdx>=0?valLines[cIdx+4]||'':'';
+        // Código verificación: segunda línea sola o "consulte (N)"
+        const cod=(raw.match(/\n(\d{9,12})\s*\n/)||raw.match(/consulte \((\d{9,12})\)/)||[])[1]||'';
+        const valBlock=(raw.split(/ESTA CERTIFICACI[OÓ]N/i)[0]||raw);
+        // Cédula: primer NNN.NNN en línea propia
+        const ced=(valBlock.match(/\n(\d{2,3}\.\d{3}(?:\.\d{3})?)\n/)||[])[1]||'';
+        // Nombre: línea de solo mayúsculas antes de VIGENTE/CANCELADA
+        let nombre=(valBlock.match(/\n([A-ZÁÉÍÓÚÑ]+ [A-ZÁÉÍÓÚÑ]+(?: [A-ZÁÉÍÓÚÑ]+)*)\n(?:VIGENTE|CANCELADA)/)||[])[1]||'';
+        if(!nombre) nombre=(valBlock.match(/CUNDINAMARCA\n([A-ZÁÉÍÓÚÑ ]+)\n/)||valBlock.match(/CASANARE\n([A-ZÁÉÍÓÚÑ ]+)\n/)||[])[1]?.trim()||'';
+        // Estado
+        const estado=(valBlock.match(/\n(VIGENTE|CANCELADA[^\n]*)\n/)||[])[1]?.trim()||'';
         const expedida=(raw.match(/Expedida el (.+?)(?:\n|$)/)||[])[1]?.trim()||'';
         const valida=(raw.match(/v[aá]lida.*?hasta el (.+?)(?:\n|$)/i)||[])[1]?.trim()||'';
-        return `Certificado Estado C\u00e9dula No. ${cedula}${nombre?' a nombre de '+nombre:''}`+
-               `${lugar?', expedida en '+lugar:''}${fechaExp?' el '+fechaExp:''}`+
-               ` \u2014 Estado: ${estado||'(sin dato)'}`+
-               `${codVer?' \u2014 C\u00f3d. verificaci\u00f3n: '+codVer:''}`+
-               `${expedida?'. Certificado expedido el '+expedida:''}`+
-               `${valida?', v\u00e1lido hasta '+valida:''}`;
+        return `Certificado Estado Cédula No. ${ced} — ${nombre} — Estado: ${estado}`+
+               `${cod?' — Cód. verificación: '+cod:''}`+
+               `${expedida?'. Expedido el '+expedida:''}${valida?', válido hasta '+valida:''}`;
       }
 
-      // ── REPORTE REGISTRADURÍA — cruce en lote PASIVOCOL ───────────────
+      // ── REPORTE REGISTRADURÍA — PASIVOCOL ─────────────────────────────
       if(t.includes('REPORTE DE CONSULTAS DE CONVENIOS EN LOTE')){
-        const radicado=(raw.match(/^(\d{6,8})\s*$/m)||[])[1]||'';
-        const fecha=(raw.match(/Bogot[a\u00e1],?\s*D\.C\.?\s+(\w+\s+\d{1,2}\s+de\s+\d{4})/)||
-                    raw.match(/Bogot[a\u00e1].*?(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})/)||[])[1]||'';
-        const firmante=(raw.match(/Atentamente\s*\n+([A-Z\u00c1\u00c9\u00cd\u00d3\u00da\u00d1\s]+)\n/)||[])[1]?.trim()||'HOSLANDER ADLAI S\u00c1ENZ BARRERA';
-        const vigentes=(raw.match(/[Vv]igentes[\s\S]*?--\s*\n+(\d+)/)||[])[1]||'36';
-        const canceladas=(raw.match(/[Cc]anceladas\s*\(\*+\)[\s\S]*?--\s*\n+(\d+)/)||[])[1]||'15';
-        const noEnc=(raw.match(/No Encontradas[\s\S]*?--\s*\n+(\d+)/)||[])[1]||'0';
-        const total=(raw.match(/Cantidad de Registros[\s\S]*?(\d{2,})\s*\n/)||[])[1]||'53';
-        const muertos=(raw.match(/[Cc]ancelada por [Mm]uerte[^\n]*\n+(\d+)/)||[])[1]||'';
-        return `Reporte Registradur\u00eda Nacional (Rad. ${radicado}, ${fecha}) \u2014 `+
-               `Cruce ANI en lote: ${total} c\u00e9dulas Gobernaci\u00f3n de Casanare procesadas. `+
+        const rad=(raw.match(/^(\d{5,8})\s*$/m)||[])[1]||'';
+        const fecha=(raw.match(/Bogot[aá],\s*D\.C\.\s+(\w+\s+\d{1,2}\s+de\s+\d{4})/)||[])[1]||'';
+        const total=(raw.match(/Cantidad de Registros\s*\n+(\d+)/)||[])[1]||'53';
+        const vigentes=(raw.match(/Cedulas Vigentes[^\n]*\n+(\d+)/)||[])[1]||'';
+        const canceladas=(raw.match(/Cedulas Canceladas[^\n]*\n+(\d+)/)||[])[1]||'';
+        const noEnc=(raw.match(/Cedulas No Encontradas[^\n]*\n+(\d+)/)||[])[1]||'0';
+        const muertos=(raw.match(/Cancelada por Muerte\s*\n+(\d+)/)||[])[1]||'';
+        const firmante=(raw.match(/\n([A-ZÁÉÍÓÚÑ]+ [A-ZÁÉÍÓÚÑ]+(?: [A-ZÁÉÍÓÚÑ]+)*)\nCoordinador de Soporte/)||[])[1]||'HOSLANDER ADLAI SÁENZ BARRERA';
+        return `Reporte Registraduría Nacional (Rad. ${rad}, ${fecha}) — `+
+               `Cruce ANI en lote: ${total} cédulas Gobernación de Casanare procesadas. `+
                `Resultado: ${vigentes} vigentes, ${canceladas} canceladas`+
                `${muertos?' ('+muertos+' por muerte)':''}, ${noEnc} no encontradas. `+
-               `Archivo: cedulas_gob_casanare.txt. Firmado: ${firmante}`;
+               `Archivo: cedulas_gob_casanare.txt. Firmó: ${firmante}.`;
       }
 
-      // ── OFICIO / MEMORANDO con texto (correo Outlook exportado a PDF) ─
-      if(raw.trim()&&raw.length>100){
-        const numOf=(detected.match(/(?:OFICIO|MEMORANDO)\s*No\.?\s*(\d+)/i)||[])[1]||'';
-        const pqrsdNum=(detected.match(/PQRSD\s*No\.?\s*(\d+)/i)||[])[1]||'';
-        const pqrsdPerson=(detected.match(/PQRSD[^A-Z\d]*(?:No\.?\s*\d+[\s_]+)?([A-Z][A-Z\s_]+)/)||[])[1]?.replace(/_/g,' ').trim()||'';
-        const radicado=(raw.match(/[Rr]adicado\s*(?:No\.?)?\s*([A-Z]{0,3}\d{10,})/)||[])[1]||'';
-        const fecha=(raw.match(/[Ff]echa\s+\w+\s+(\d{4}-\d{2}-\d{2})/)||
-                    raw.match(/\d{4}-\d{2}-\d{2}/)||[])[0]||'';
-        const remitente=(raw.match(/[Dd]esde\s+(.+?)(?:\s*<|\n)/)||[])[1]?.trim()||
-                        (raw.match(/Cordialmente[,\s]*\n+([^\n]+)/)||[])[1]?.trim()||'';
-        const destinatario=(raw.match(/[Pp]ara\s*\n*(.+?)(?:\s*<|\n)/)||[])[1]?.trim()||'';
-        const cuerpo=(raw.match(/[Bb]uenos d[i\u00ed]as,?[\s\S]*?(?=\nCordialmente|\nAtentamente)/)||[])[0]?.trim().slice(0,200)||'';
+      // ── OFICIO / MEMORANDO con texto ──────────────────────────────────
+      if(raw.trim()&&raw.length>80){
+        // Número del doc: primero desde detected (nombre archivo), luego del texto
+        const numOf=(detected.match(/(?:OFICIO|MEMORANDO)\s*No\.?\s*(\d+)/i)||
+                     raw.match(/OFICIO No\. (\d+)/)||[])[1]||'';
+        const pqrsdNum=(detected.match(/PQRSD\s*No\.?\s*(\d+)/i)||
+                        raw.match(/PQRSD No\. (\d+)/)||[])[1]||'';
+        // Nombre del ciudadano desde el nombre del archivo
+        const pqrsdPer=(detected.match(/PQRSD[^A-ZÁÉÍÓÚÑ\d]*(?:No\.?\s*\d+[\s_]+)?([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ_\s]+?)(?:\.pdf|$)/i)||[])[1]?.replace(/_/g,' ').trim()||'';
+        const rad=(raw.match(/[Rr]adicado\s*(?:No\.?)?\s*([A-Z]{0,3}\d{10,})/)||[])[1]||'';
+        const fecha=(raw.match(/[Ff]echa\s+\w+\s+(\d{4}-\d{2}-\d{2})/)||raw.match(/\d{4}-\d{2}-\d{2}/)||[])[0]||'';
+        const remitente=(raw.match(/[Dd]esde\s+(.+?)\s*</)||[])[1]?.trim()||'';
+        const asunto=(raw.match(/Respuesta radicado No\. ([A-Z0-9]+)/)||[])[0]||'';
         const tipo=nameUp.includes('MEMORANDO')?'MEMORANDO':'OFICIO';
         return `${tipo} No. ${numOf}`+
-               `${pqrsdNum?' \u2014 PQRSD No. '+pqrsdNum+(pqrsdPerson?' (ciudadano: '+pqrsdPerson+')':''):''}` +
-               `${remitente?' \u2014 Remitente: '+remitente:''}`+
-               `${radicado?' \u2014 Radicado: '+radicado:''}`+
-               `${fecha?' ('+fecha+')':''}`+
-               `${cuerpo?'. '+cuerpo+'...':''}`;
+               `${pqrsdNum?' (PQRSD No. '+pqrsdNum+(pqrsdPer?' — '+pqrsdPer:'')+')'  :''}` +
+               `${asunto?' — '+asunto:''}` +
+               `${remitente?' — Remitente: '+remitente:''}` +
+               `${rad?' — Radicado: '+rad:''}` +
+               `${fecha?' ('+fecha+')':''}`;
       }
 
-      // ── Sin texto — enriquecer desde detected + nombre archivo ────────
+      // ── Sin texto — detectar desde nombre archivo ─────────────────────
       if(nameUp.includes('PQRSD')){
         const num=(detected.match(/PQRSD\s*No\.?\s*(\d+)/i)||[])[1]||'';
-        const rest=detected.replace(/^.*?PQRSD\s*No\.?\s*\d+[\s_\-]*/i,'').replace(/_/g,' ').trim();
-        return `PQRSD No. ${num}${rest?' \u2014 Ciudadano: '+rest:''} \u2014 respuesta a solicitud ciudadana (Obligaci\u00f3n 8)`;
+        const per=detected.replace(/^.*?PQRSD\s*No\.?\s*\d+[\s_-]*/i,'').replace(/[_-]/g,' ').replace(/\.pdf$/i,'').trim();
+        return `PQRSD No. ${num}${per?' — Ciudadano: '+per:''} — respuesta a solicitud ciudadana`;
       }
       if(nameUp.includes('OFICIO')){
         const num=(detected.match(/OFICIO\s*No\.?\s*(\d+)/i)||[])[1]||'';
         const pqrsd=(detected.match(/PQRSD\s*No\.?\s*(\d+)/i)||[])[1]||'';
-        const person=pqrsd?(detected.match(/PQRSD[^A-Z\d]*\d+[\s_]([A-Z_]+)/i)||[])[1]?.replace(/_/g,' ')||'':'';
-        return `OFICIO No. ${num}`+
-               (pqrsd?` \u2014 Respuesta a PQRSD No. ${pqrsd}${person?' ('+person+')':''}`:'')+
-               ` \u2014 Direcci\u00f3n de Talento Humano, Gobernaci\u00f3n de Casanare`;
+        return `OFICIO No. ${num}`+(pqrsd?` (respuesta PQRSD No. ${pqrsd})`:'');
       }
       if(nameUp.includes('MEMORANDO')){
         const num=(detected.match(/MEMORANDO\s*No\.?\s*(\d+)/i)||[])[1]||'';
-        return `MEMORANDO No. ${num} \u2014 Direcci\u00f3n de Talento Humano, Gobernaci\u00f3n de Casanare`;
+        return `MEMORANDO No. ${num}`;
       }
       if(nameUp.includes('CERTIFICAD')||nameUp.includes('CERTIF')){
-        const num=(detected.match(/(?:Certificaci[o\u00f3]n|No\.?)\s*(\d+)/i)||[])[1]||'';
-        return `Certificaci\u00f3n No. ${num} \u2014 elaborada en el per\u00edodo reportado`;
-      }
-      if(nameUp.includes('ACTA')){
         const num=(detected.match(/No\.?\s*(\d+)/i)||[])[1]||'';
-        return `Acta${num?' No. '+num:''} \u2014 ${detected}`;
+        return `Certificación No. ${num}`;
       }
+      if(nameUp.includes('ACTA')) return `Acta — ${detected}`;
       return detected||'(Soporte sin nombre)';
+
     }
 
     const richLabels=docContents.map(dc=>buildDocLabel(dc));
