@@ -151,6 +151,20 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--az2);}
             <label class="fl">⚠️ Novedades / pendientes</label>
             <textarea id="f-nov" rows="2" placeholder="Ej: pendiente respuesta OFICIO No. 316..."></textarea>
           </div>
+          <!-- Generate description button -->
+          <div id="fg-gen-btn" style="display:none;margin-top:8px;">
+            <div style="background:var(--az-lt);border-radius:7px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="font-size:11px;color:#334155;">
+                <b>✨ Generar descripción con IA</b><br>
+                <span style="color:var(--gr);">Basado en los documentos asignados y las referencias del Informe No. 1</span>
+              </div>
+              <button class="btn btn-p btn-sm" id="btn-gen-desc" onclick="genDescription()">
+                ✨ Generar
+              </button>
+            </div>
+            <div id="gen-desc-status" style="font-size:11px;color:var(--gr);margin-top:4px;display:none;"></div>
+          </div>
+
           <div id="fg-btns" style="display:none;margin-top:12px;" class="brow">
             <button class="btn btn-p" onclick="saveAct()">💾 Guardar actividad</button>
             <button class="btn btn-o" onclick="nextObl()">Siguiente →</button>
@@ -482,7 +496,7 @@ function renderForm(){
   document.getElementById('f-desc').value=a.desc||'';
   document.getElementById('f-pct').value=a.pct||'';
   document.getElementById('f-nov').value=a.novedad||'';
-  ['fg-desc','fg-pct','fg-docs','fg-nov','fg-btns'].forEach(id=>document.getElementById(id).style.display='');
+  ['fg-desc','fg-pct','fg-docs','fg-gen-btn','fg-nov','fg-btns'].forEach(id=>document.getElementById(id).style.display='');
   const assigned=Object.values(docs).filter(d=>d.acts&&d.acts.includes(activeN));
   document.getElementById('form-docs-list').innerHTML=assigned.length?assigned.map(d=>`<div class="di">
     <span style="font-size:18px;flex-shrink:0;">${dIcon(d.type)}</span>
@@ -1294,6 +1308,204 @@ async function downloadBlob(blob,filename){
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 function renderCfgForm(){const cfg=gc();document.getElementById('cn').value=cfg.n||'1';document.getElementById('cf').value=cfg.f||'2026-09-03';document.getElementById('cd').value=cfg.d||'2026-08-04';document.getElementById('cht').value=cfg.h||'2026-09-03';document.getElementById('cname').value=cfg.name||'LELIO EDUARDO ACERO PINTO';document.getElementById('csecop').value=cfg.secop||'CAS-GEN-CDPSP-0120-2026 1681';}
 function saveCfg(){const s=gs();s.cfg={n:document.getElementById('cn').value,f:document.getElementById('cf').value,d:document.getElementById('cd').value,h:document.getElementById('cht').value,name:document.getElementById('cname').value,secop:document.getElementById('csecop').value};ss(s);renderContractSelector();toast('✓ Configuración guardada');}
+
+// ── GENERATE DESCRIPTION WITH AI ─────────────────────────────────────────────
+// Reference texts from Informe No. 1 — used as style/tone examples
+const INFORME1_REF = {
+  1: "Brindé acompañamiento profesional en la validación, depuración y actualización de las historias laborales en PASIVOCOL 6.0. Identifiqué la inconsistencia CODERR F9-020 (4 registros) y elaboré las Certificaciones Nos. 393-396, remitidas mediante MEMORANDO No. 788. Gestioné la inconsistencia F9-952 (AGUDELO RIVERO NANCY) con respuesta ANI confirmada. Radicé OFICIO No. 316 a la Registraduría Nacional para verificar datos de 55 ex funcionarios.",
+  2: "Avancé en la preparación y estructuración de los archivos planos y soportes técnicos para subsanación de inconsistencias F9-020 y F9-952, así como para los CETIL de 7 funcionarios retirados. No se realizó cargue efectivo al aplicativo en este período; proceso en espera de respuesta al OFICIO No. 316.",
+  3: "Gestioné la consolidación de la documentación para el cálculo actuarial, verificando su integridad frente a PASIVOCOL. Elaboré y radicé OFICIO No. 316 a la Registraduría Nacional solicitando certificación de datos de identidad de 55 ex funcionarios (Ley 549/1999, Decreto 1068/2015).",
+  4: "Realicé la revisión técnica de nómina agosto 2026: Administración Central (227 EP, calificación 68,8/100) y Banco de Maquinaria (75 TO, cruce PILA exacto $0 diferencia, Certificación No. 414). Lideré el comité técnico del 02/09/2026 (MEMORANDO No. 735). Revisé proyección presupuestal 2027.",
+  5: "Revisé y validé los conceptos que afectan la nómina agosto 2026: retención en la fuente (procedimientos 1 y 2, UVT 2026 = $52.374), aportes SSS, parafiscales y deducciones autorizadas. Verifiqué IBC, riesgo ARL Clase V para Trabajadores Oficiales y base de parafiscales por Convención Colectiva.",
+  6: "Contribuí en la depuración de la base gravable aplicando procedimientos 1 y 2 de retención en la fuente (Arts. 383, 385, 386, 387 E.T.). Verifiqué rentas exentas Art. 206 E.T., deducciones Art. 387 E.T. y parametrización correcta en KACTUS con UVT 2026.",
+  7: "Elaboré los siguientes documentos: OFICIO No. 316 (Registraduría), Certificaciones Nos. 393-396 (PASIVOCOL F9-020), MEMORANDOS Nos. 735, 788 y 789, Certificación No. 414 (nómina Banco de Maquinaria). Tramité afiliaciones COMFACASANARE de 5 servidores.",
+  8: "Respondí oportunamente: solicitud CETIL coordinadora ENIT (OFICIO No. 316), MEMORANDO No. 117 Secretaría Salud (respondido MEMORANDO No. 789), inconsistencia F9-952 (coordinación ANI), consultas técnicas comité nómina 02/09/2026.",
+  9: "Ejecuté el procedimiento integral PASIVOCOL 6.0: identifiqué inconsistencias, elaboré certificaciones de subsanación, coordiné con Registraduría Nacional, preparé soportes para cargue y realicé seguimiento al proceso de CETIL de 7 funcionarios retirados.",
+  10: "Elaboré y presenté el Informe de Actividades No. 1 junto con el Acta Resumen FO-GD-11, consolidando las actividades desarrolladas, avances y evidencias documentales, como requisito previo para el trámite del pago correspondiente.",
+  11: "No se presentaron actividades adicionales asignadas por la supervisora distintas a las relacionadas en las Obligaciones 1 a 10."
+};
+
+async function genDescription(){
+  const btn=document.getElementById('btn-gen-desc');
+  const status=document.getElementById('gen-desc-status');
+  const o=OBLS.find(x=>x.n===activeN);
+  const docs=gd();
+  const assignedDocs=Object.values(docs).filter(d=>d.acts&&d.acts.includes(activeN));
+
+  if(!assignedDocs.length){
+    toast('Asigna al menos un documento antes de generar','warn');
+    return;
+  }
+
+  btn.innerHTML='<span class="spin"></span> Generando...';
+  btn.disabled=true;
+  status.style.display='';
+  status.textContent='Extrayendo texto de los documentos...';
+
+  try{
+    // ── Extract content from each document ──────────────────────────────────
+    // Returns {text, images:[{type,data}]} per doc
+    const docContents=[];
+    for(const doc of assignedDocs){
+      const name=doc.detected||doc.name;
+      const type=doc.type||'';
+      let text='';
+      const images=[];
+
+      // ── PDF: extract text with PDF.js ──────────────────────────────────
+      if((type==='application/pdf'||doc.name.match(/\.pdf$/i))&&doc.dataUrl){
+        try{
+          const b64=doc.dataUrl.split(',')[1];
+          const bin=atob(b64);
+          const buf=new Uint8Array(bin.length);
+          for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+          const pdf=await pdfjsLib.getDocument({data:buf,verbosity:0}).promise;
+          const maxPg=Math.min(pdf.numPages,4);
+          for(let i=1;i<=maxPg;i++){
+            try{
+              const page=await pdf.getPage(i);
+              const content=await page.getTextContent();
+              const pageText=content.items.map(it=>it.str).join(' ');
+              if(pageText.trim()) text+=pageText+'\n';
+            }catch(e){}
+          }
+        }catch(e){}
+        // If text extraction failed, use the rendered page images
+        if(!text.trim()&&doc.pages?.length){
+          for(const pg of doc.pages.slice(0,2)){
+            const b64=pg.split(',')[1];
+            if(b64) images.push({type:'image/jpeg',data:b64});
+          }
+        }
+      }
+
+      // ── IMAGE (JPG/PNG): send directly as vision input ─────────────────
+      else if(type.startsWith('image/')&&doc.dataUrl){
+        const b64=doc.dataUrl.split(',')[1];
+        const mediaType=type||'image/jpeg';
+        if(b64) images.push({type:mediaType,data:b64});
+      }
+      // Also include rendered pages for any doc type that has them
+      else if(doc.pages?.length&&!text){
+        for(const pg of doc.pages.slice(0,2)){
+          const b64=pg.split(',')[1];
+          if(b64) images.push({type:'image/jpeg',data:b64});
+        }
+      }
+
+      // ── EXCEL: extract cell data with SheetJS ──────────────────────────
+      if(type.includes('spreadsheet')||type.includes('excel')||doc.name.match(/\.xlsx?$/i)){
+        try{
+          if(!window.XLSX){
+            await new Promise((res,rej)=>{
+              const s=document.createElement('script');
+              s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+              s.onload=res; s.onerror=rej; document.head.appendChild(s);
+            });
+          }
+          // Re-read the file from dataUrl
+          const b64=doc.dataUrl?.split(',')[1];
+          if(b64){
+            const bin=atob(b64);
+            const buf=new Uint8Array(bin.length);
+            for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+            const wb=XLSX.read(buf,{type:'array'});
+            for(const sheetName of wb.SheetNames.slice(0,2)){
+              const ws=wb.Sheets[sheetName];
+              const csv=XLSX.utils.sheet_to_csv(ws,{blankrows:false});
+              text+=`[Hoja: ${sheetName}]\n${csv.slice(0,1200)}\n`;
+            }
+          }
+        }catch(e){ console.warn('Excel extract error',e); }
+      }
+
+      if(!text.trim()) text=name;
+      docContents.push({name, text:text.slice(0,1000), images});
+    }
+
+    status.textContent='Generando descripción con IA...';
+
+    // ── Build message content array (text + images) ──────────────────────
+    const currentDesc=document.getElementById('f-desc').value.trim();
+    const ref=INFORME1_REF[activeN]||'';
+
+    const systemPrompt=`Eres el asistente de LELIO EDUARDO ACERO PINTO, Contador Público contratista de la Dirección de Talento Humano de la Gobernación de Casanare, Contrato 1681 de 2026.
+
+Tu tarea es redactar la descripción técnica de la Obligación No. ${activeN} para el informe mensual de actividades.
+
+OBLIGACIÓN No. ${activeN}: ${o.tx}
+
+REFERENCIA INFORME No. 1 (usa exactamente este tono y estilo):
+${ref}
+
+${currentDesc?`DESCRIPCIÓN YA ESCRITA (complementa o mejora):\n${currentDesc}\n`:''}
+
+REGLAS ESTRICTAS:
+- Primera persona activa: "elaboré", "verifiqué", "radicé", "identifiqué", "revisé"
+- Inicia con "Durante el período reportado,"
+- Específico: extrae y menciona números de documentos, fechas, nombres, valores que veas
+- Conciso: máximo 6 líneas
+- Tono profesional técnico
+- SOLO la descripción, sin títulos ni encabezados`;
+
+    // Build content array: text prompt + document images
+    const contentArray=[{type:'text',text:systemPrompt}];
+
+    // Add text extractions as part of the prompt
+    let docsText='\n\nDOCUMENTOS DE SOPORTE:\n';
+    for(const dc of docContents){
+      docsText+=`\n--- ${dc.name} ---\n${dc.text}\n`;
+    }
+    contentArray[0].text+=docsText;
+
+    // Add images (vision)
+    for(const dc of docContents){
+      for(const img of dc.images){
+        contentArray.push({
+          type:'image',
+          source:{type:'base64',media_type:img.type,data:img.data}
+        });
+      }
+    }
+
+    const response=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:500,
+        messages:[{role:'user',content:contentArray}]
+      })
+    });
+
+    if(!response.ok) throw new Error('API error: '+response.status);
+    const data=await response.json();
+    const generated=data.content?.[0]?.text||'';
+
+    if(generated){
+      // Append to existing description or replace if empty
+      const textarea=document.getElementById('f-desc');
+      if(currentDesc){
+        textarea.value=currentDesc+'\n\n'+generated;
+      } else {
+        textarea.value=generated;
+      }
+      status.textContent='✓ Descripción generada — revisa y ajusta si es necesario';
+      status.style.color='var(--vd)';
+      toast('✓ Descripción generada con IA');
+    } else {
+      throw new Error('Respuesta vacía');
+    }
+  }catch(e){
+    status.textContent='Error al generar: '+e.message;
+    status.style.color='var(--rd)';
+    toast('Error al generar descripción','err');
+    console.error(e);
+  }
+
+  btn.innerHTML='✨ Generar';
+  btn.disabled=false;
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 (function init(){
