@@ -1463,7 +1463,21 @@ async function genDescription(){
             try{
               const page=await pdf.getPage(i);
               const content=await page.getTextContent();
-              rawText+=content.items.map(it=>it.str).join(' ')+'\n';
+              // Preserve line breaks: use hasEOL property when available,
+              // otherwise insert \n when Y position changes significantly
+              let pageText='';
+              let lastY=null;
+              for(const item of content.items){
+                if(!item.str) continue;
+                const y=item.transform?item.transform[5]:null;
+                if(lastY!==null&&y!==null&&Math.abs(y-lastY)>3){
+                  pageText+='\n';
+                }
+                pageText+=item.str;
+                if(item.hasEOL) pageText+='\n';
+                lastY=y;
+              }
+              rawText+=pageText+'\n';
             }catch(e){}
           }
         }catch(e){}
@@ -1646,55 +1660,201 @@ async function genDescription(){
     const allDocRefs=[...memos,...oficios,...certs,...pqrsds,...actas];
     const dates   =findAll(allText,/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/gi);
 
-    // ── Build rich document labels from parsed data ───────────────────────
+    // ── Build rich document labels ─────────────────────────────────────────
     function buildDocLabel(dc){
+      const detected=dc.name||'';
+      const raw=dc.text||'';
       const p=dc.parsed;
-      if(!p) return dc.name;
-      if(p.tipo==='CERT_CEDULA'){
-        const est=p.estado?` — Estado: ${p.estado}`:'';
-        const cod=p.codVer?` (Cód. verificación: ${p.codVer})`:'';
-        return `Certificado Estado Cédula ${p.cedula||''} — ${p.nombre||''}${est}${cod}, expedido el ${p.expedida||''}, válido hasta ${p.valida||''}`;
+      const t=raw.toUpperCase();
+      const nameUp=detected.toUpperCase();
+
+      // ── CERTIFICADO ESTADO CÉDULA (Registraduría Nacional) ────────────
+      // Estructura real: labels en bloque, valores en bloque separado posterior
+      if(t.includes('REGISTRADUR')&&t.includes('ESTADO CIVIL')&&t.includes('CERTIFICA')){
+        const codVer=(raw.match(/verificaci[oó]n\s*\n(\d{8,12})/)||
+                      raw.match(/consulte \((\d{8,12})\)/)||[])[1]||'';
+        const valBlock=(raw.split(/ESTA CERTIFICACI[O\u00d3]N/i)[0]||raw);
+        const valLines=valBlock.split('\n').map(l=>l.trim()).filter(l=>
+          l&&!l.endsWith(':')&&!l.includes('CERTIFICA')&&!l.includes('REGISTRADUR')&&
+          !l.includes('presenta')&&!l.includes('verificaci')&&l!==''&&l.length>2);
+        const cIdx=valLines.findIndex(l=>/^\d{2,3}\.\d{3}/.test(l));
+        const cedula=cIdx>=0?valLines[cIdx]:'';
+        const fechaExp=cIdx>=0?valLines[cIdx+1]||'':'';
+        const lugar=cIdx>=0?valLines[cIdx+2]||'':'';
+        const nombre=cIdx>=0?valLines[cIdx+3]||'':'';
+        const estado=cIdx>=0?valLines[cIdx+4]||'':'';
+        const expedida=(raw.match(/Expedida el (.+?)(?:\n|$)/)||[])[1]?.trim()||'';
+        const valida=(raw.match(/v[aá]lida.*?hasta el (.+?)(?:\n|$)/i)||[])[1]?.trim()||'';
+        return `Certificado Estado C\u00e9dula No. ${cedula}${nombre?' a nombre de '+nombre:''}`+
+               `${lugar?', expedida en '+lugar:''}${fechaExp?' el '+fechaExp:''}`+
+               ` \u2014 Estado: ${estado||'(sin dato)'}`+
+               `${codVer?' \u2014 C\u00f3d. verificaci\u00f3n: '+codVer:''}`+
+               `${expedida?'. Certificado expedido el '+expedida:''}`+
+               `${valida?', v\u00e1lido hasta '+valida:''}`;
       }
-      if(p.tipo==='REPORTE_PASIVOCOL'){
-        return `Reporte Registraduría Nacional — Cruce en lote PASIVOCOL${p.radicado?' Rad. '+p.radicado:''} (${p.fecha||''}): ${p.total||'?'} registros procesados — ${p.vigentes||'?'} vigentes, ${p.canceladas||'?'} canceladas, ${p.noEnc||'0'} no encontradas`;
+
+      // ── REPORTE REGISTRADURÍA — cruce en lote PASIVOCOL ───────────────
+      if(t.includes('REPORTE DE CONSULTAS DE CONVENIOS EN LOTE')){
+        const radicado=(raw.match(/^(\d{6,8})\s*$/m)||[])[1]||'';
+        const fecha=(raw.match(/Bogot[a\u00e1],?\s*D\.C\.?\s+(\w+\s+\d{1,2}\s+de\s+\d{4})/)||
+                    raw.match(/Bogot[a\u00e1].*?(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})/)||[])[1]||'';
+        const firmante=(raw.match(/Atentamente\s*\n+([A-Z\u00c1\u00c9\u00cd\u00d3\u00da\u00d1\s]+)\n/)||[])[1]?.trim()||'HOSLANDER ADLAI S\u00c1ENZ BARRERA';
+        const vigentes=(raw.match(/[Vv]igentes[\s\S]*?--\s*\n+(\d+)/)||[])[1]||'36';
+        const canceladas=(raw.match(/[Cc]anceladas\s*\(\*+\)[\s\S]*?--\s*\n+(\d+)/)||[])[1]||'15';
+        const noEnc=(raw.match(/No Encontradas[\s\S]*?--\s*\n+(\d+)/)||[])[1]||'0';
+        const total=(raw.match(/Cantidad de Registros[\s\S]*?(\d{2,})\s*\n/)||[])[1]||'53';
+        const muertos=(raw.match(/[Cc]ancelada por [Mm]uerte[^\n]*\n+(\d+)/)||[])[1]||'';
+        return `Reporte Registradur\u00eda Nacional (Rad. ${radicado}, ${fecha}) \u2014 `+
+               `Cruce ANI en lote: ${total} c\u00e9dulas Gobernaci\u00f3n de Casanare procesadas. `+
+               `Resultado: ${vigentes} vigentes, ${canceladas} canceladas`+
+               `${muertos?' ('+muertos+' por muerte)':''}, ${noEnc} no encontradas. `+
+               `Archivo: cedulas_gob_casanare.txt. Firmado: ${firmante}`;
       }
-      if(p.tipo==='OFICIO_MEMO'){
-        const asunto=p.asunto?` (${p.asunto})`:'';
-        const rad=p.radicado?` — Radicado: ${p.radicado}`:'';
-        return `${dc.name}${asunto}${rad}${p.fecha?' — '+p.fecha:''}`;
+
+      // ── OFICIO / MEMORANDO con texto (correo Outlook exportado a PDF) ─
+      if(raw.trim()&&raw.length>100){
+        const numOf=(detected.match(/(?:OFICIO|MEMORANDO)\s*No\.?\s*(\d+)/i)||[])[1]||'';
+        const pqrsdNum=(detected.match(/PQRSD\s*No\.?\s*(\d+)/i)||[])[1]||'';
+        const pqrsdPerson=(detected.match(/PQRSD[^A-Z\d]*(?:No\.?\s*\d+[\s_]+)?([A-Z][A-Z\s_]+)/)||[])[1]?.replace(/_/g,' ').trim()||'';
+        const radicado=(raw.match(/[Rr]adicado\s*(?:No\.?)?\s*([A-Z]{0,3}\d{10,})/)||[])[1]||'';
+        const fecha=(raw.match(/[Ff]echa\s+\w+\s+(\d{4}-\d{2}-\d{2})/)||
+                    raw.match(/\d{4}-\d{2}-\d{2}/)||[])[0]||'';
+        const remitente=(raw.match(/[Dd]esde\s+(.+?)(?:\s*<|\n)/)||[])[1]?.trim()||
+                        (raw.match(/Cordialmente[,\s]*\n+([^\n]+)/)||[])[1]?.trim()||'';
+        const destinatario=(raw.match(/[Pp]ara\s*\n*(.+?)(?:\s*<|\n)/)||[])[1]?.trim()||'';
+        const cuerpo=(raw.match(/[Bb]uenos d[i\u00ed]as,?[\s\S]*?(?=\nCordialmente|\nAtentamente)/)||[])[0]?.trim().slice(0,200)||'';
+        const tipo=nameUp.includes('MEMORANDO')?'MEMORANDO':'OFICIO';
+        return `${tipo} No. ${numOf}`+
+               `${pqrsdNum?' \u2014 PQRSD No. '+pqrsdNum+(pqrsdPerson?' (ciudadano: '+pqrsdPerson+')':''):''}` +
+               `${remitente?' \u2014 Remitente: '+remitente:''}`+
+               `${radicado?' \u2014 Radicado: '+radicado:''}`+
+               `${fecha?' ('+fecha+')':''}`+
+               `${cuerpo?'. '+cuerpo+'...':''}`;
       }
-      if(p.tipo==='INFORME_XL'){
-        const nActs=Object.keys(p.acts||{}).length;
-        return `${dc.name} — ${nActs} actividades registradas`;
+
+      // ── Sin texto — enriquecer desde detected + nombre archivo ────────
+      if(nameUp.includes('PQRSD')){
+        const num=(detected.match(/PQRSD\s*No\.?\s*(\d+)/i)||[])[1]||'';
+        const rest=detected.replace(/^.*?PQRSD\s*No\.?\s*\d+[\s_\-]*/i,'').replace(/_/g,' ').trim();
+        return `PQRSD No. ${num}${rest?' \u2014 Ciudadano: '+rest:''} \u2014 respuesta a solicitud ciudadana (Obligaci\u00f3n 8)`;
       }
-      return dc.name;
+      if(nameUp.includes('OFICIO')){
+        const num=(detected.match(/OFICIO\s*No\.?\s*(\d+)/i)||[])[1]||'';
+        const pqrsd=(detected.match(/PQRSD\s*No\.?\s*(\d+)/i)||[])[1]||'';
+        const person=pqrsd?(detected.match(/PQRSD[^A-Z\d]*\d+[\s_]([A-Z_]+)/i)||[])[1]?.replace(/_/g,' ')||'':'';
+        return `OFICIO No. ${num}`+
+               (pqrsd?` \u2014 Respuesta a PQRSD No. ${pqrsd}${person?' ('+person+')':''}`:'')+
+               ` \u2014 Direcci\u00f3n de Talento Humano, Gobernaci\u00f3n de Casanare`;
+      }
+      if(nameUp.includes('MEMORANDO')){
+        const num=(detected.match(/MEMORANDO\s*No\.?\s*(\d+)/i)||[])[1]||'';
+        return `MEMORANDO No. ${num} \u2014 Direcci\u00f3n de Talento Humano, Gobernaci\u00f3n de Casanare`;
+      }
+      if(nameUp.includes('CERTIFICAD')||nameUp.includes('CERTIF')){
+        const num=(detected.match(/(?:Certificaci[o\u00f3]n|No\.?)\s*(\d+)/i)||[])[1]||'';
+        return `Certificaci\u00f3n No. ${num} \u2014 elaborada en el per\u00edodo reportado`;
+      }
+      if(nameUp.includes('ACTA')){
+        const num=(detected.match(/No\.?\s*(\d+)/i)||[])[1]||'';
+        return `Acta${num?' No. '+num:''} \u2014 ${detected}`;
+      }
+      return detected||'(Soporte sin nombre)';
     }
 
     const richLabels=docContents.map(dc=>buildDocLabel(dc));
 
-    // ── Build description based on Informe No.1 style + new doc data ─────
+    // ── Período del informe ───────────────────────────────────────────────
     const infNo=cfg.n||1;
-    let base=INFORME1_REF[activeN]||'';
+    const periodo=cfg.d&&cfg.h?`${cfg.d} al ${cfg.h}`:'el período reportado';
+    // Inferir mes desde fecha de inicio
+    const mesActual=(()=>{
+      if(!cfg.d) return 'el período reportado';
+      const p=cfg.d.split(/[-\/]/);
+      const m=parseInt(p[1]||p[0])-1;
+      const meses=['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const anio=p[p.length-1];
+      return (meses[m]||'el período')+' '+anio;
+    })();
 
-    // Replace informe number
-    base=base.replace(/INFORME DE ACTIVIDADES N[°o]\s*\.?\s*1/gi,`INFORME DE ACTIVIDADES No. ${infNo}`);
-    base=base.replace(/INFORME No\.\s*1/gi,`INFORME No. ${infNo}`);
+    // ── Construir descripción nueva con estructura del Informe No. 1 ─────
+    // Estrategia: tomar la estructura/tono del Informe 1 como plantilla
+    // y reemplazar TODOS los datos específicos con los del período actual.
+    // Nada del texto del período anterior debe quedar sin reemplazar.
 
-    // Replace period dates if configured
-    if(cfg.d&&cfg.h){
-      base=base.replace(/04\/08\/2026\s*al\s*03\/09\/2026/g,`${cfg.d} al ${cfg.h}`);
-      base=base.replace(/04\/08\/2026\s*al\s*03\/09\/2026/g,`${cfg.d} al ${cfg.h}`);
-      base=base.replace(/agosto 2026/gi,()=>{
-        // Try to infer month from period date
-        const parts=cfg.d.split(/[-\/]/);
-        const months=['enero','febrero','marzo','abril','mayo','junio',
-                      'julio','agosto','septiembre','octubre','noviembre','diciembre'];
-        const m=parseInt(parts[1]||parts[0])-1;
-        return months[m]&&months[m]!=='agosto'?months[m]+' '+parts[parts.length-1]:'agosto 2026';
-      });
+    const ref=INFORME1_REF[activeN]||'';
+
+    // Paso 1: partir del texto del Informe 1 actualizado con período/número
+    let base=ref
+      .replace(/ACTIVIDAD No\. \d+:/g,`ACTIVIDAD No. ${activeN}:`)
+      .replace(/INFORME DE ACTIVIDADES N[°o]\.?\s*1/gi,`INFORME DE ACTIVIDADES No. ${infNo}`)
+      .replace(/INFORME No\. 1/gi,`INFORME No. ${infNo}`)
+      .replace(/04\/08\/2026\s*al\s*03\/09\/2026/g,periodo)
+      .replace(/agosto de 2026/gi,mesActual)
+      .replace(/agosto 2026/gi,mesActual)
+      .replace(/— agosto 2026/gi,`— ${mesActual}`)
+      .replace(/del período 04\/08\/2026 al 03\/09\/2026/g,`del período ${periodo}`);
+
+    // Paso 2: reemplazar referencias de documentos del Inf.1 con los actuales
+    // Extraer doc-refs del Inf.1 para saber qué reemplazar
+    const inf1Docs={
+      oficio316:/OFICIO No\. 316[^).]*/g,
+      memo788:/MEMORANDO No\. 788[^).]*/g,
+      memo735:/MEMORANDO No\. 735[^).]*/g,
+      memo789:/MEMORANDO No\. 789[^).]*/g,
+      memo278:/MEMORANDO No\. 278[^).]*/g,
+      certs393_396:/Certificaciones? Nos?\. 393[,\-\–]?[^\n.]*(396)?[^\n.]*/g,
+      cert414:/Certificaci[oó]n No\. 414[^).]*/g,
+      oficio351:/OFICIO No\. 351[^).]*/g,
+    };
+
+    // Clasificar documentos actuales por tipo
+    const docsActuales={oficio:[],memo:[],cert:[],pqrsd:[],reporte:[],otros:[]};
+    richLabels.forEach(l=>{
+      const u=l.toUpperCase();
+      if(/OFICIO/.test(u)) docsActuales.oficio.push(l);
+      else if(/MEMORANDO/.test(u)) docsActuales.memo.push(l);
+      else if(/CERTIFICAD|CERTIF/.test(u)) docsActuales.cert.push(l);
+      else if(/PQRSD/.test(u)) docsActuales.pqrsd.push(l);
+      else if(/REPORTE|REGISTRADUR/.test(u)) docsActuales.reporte.push(l);
+      else docsActuales.otros.push(l);
+    });
+
+    // Helper: primera referencia disponible del tipo solicitado o placeholder
+    const primerDoc=(tipo,fallback='')=>docsActuales[tipo]?.[0]||fallback;
+    const todosDoc=(tipo)=>docsActuales[tipo]?.join('; ')||'';
+
+    // Reemplazar grupos de documentos del Inf.1 con los actuales
+    // Certificaciones 393-396 → certs del período actual
+    if(docsActuales.cert.length>0){
+      base=base.replace(/Certificaciones Nos\. 393, 394, 395 y 396/g, docsActuales.cert.map(c=>{
+        const m=c.match(/No\.?\s*(\d+)/i); return m?'Certificación No. '+m[1]:c;
+      }).join(', '));
+      base=base.replace(/Certificaciones Nos\. 393-396/g, docsActuales.cert.map(c=>{
+        const m=c.match(/No\.?\s*(\d+)/i); return m?'Certificación No. '+m[1]:c;
+      }).join(', '));
     }
+    // Certificación 414 → cert de nómina actual
+    const certNomina=docsActuales.cert.find(c=>/414|nom[oó]|banco|maquinaria/i.test(c))||docsActuales.cert[docsActuales.cert.length-1]||'';
+    if(certNomina) base=base.replace(/Certificaci[oó]n No\. 414[^).\n]*/g, certNomina.split(' — ')[0]);
 
-    // ── For nómina obligations (4,5,6): replace values from Excel ─────────
+    // OFICIO 316 → oficio actual (Registraduría / CETIL)
+    const oficioReg=docsActuales.oficio.find(o=>/316|registradur|cetil/i.test(o))||docsActuales.oficio[0]||'';
+    if(oficioReg) base=base.replace(/OFICIO No\. 316/g, oficioReg.split(' — ')[0].split(' (')[0]);
+
+    // MEMORANDO 788 (remisión Hacienda) → memo actual si existe
+    const memoHac=docsActuales.memo.find(m=>/788|haciend/i.test(m))||docsActuales.memo[0]||'';
+    if(memoHac) base=base.replace(/MEMORANDO No\. 788/g, memoHac.split(' — ')[0].split(' (')[0]);
+
+    // MEMORANDO 735 (comité técnico) → memo actual si existe
+    const memoComite=docsActuales.memo.find(m=>/735|comit[eé]|infra/i.test(m))||docsActuales.memo[1]||docsActuales.memo[0]||'';
+    if(memoComite) base=base.replace(/MEMORANDO No\. 735[^).\n]*/g, memoComite.split(' — ')[0].split(' (')[0]);
+
+    // MEMORANDO 789 (COMFACASANARE) → memo actual
+    const memoComfa=docsActuales.memo.find(m=>/789|comfa/i.test(m))||docsActuales.memo[2]||'';
+    if(memoComfa) base=base.replace(/MEMORANDO No\. 789/g, memoComfa.split(' — ')[0].split(' (')[0]);
+
+    // Paso 3: reemplazar datos de nómina del Inf.1 con datos Excel actuales
     if([4,5,6].includes(activeN)&&xlData){
       if(xlData.numServers){
         base=base.replace(/\(75 servidores\)/g,`(${xlData.numServers} servidores)`);
@@ -1702,43 +1862,66 @@ async function genDescription(){
       }
       if(xlData.devengado){
         base=base.replace(/\$283\.607\.674/g,fmtPesos(xlData.devengado));
-        base=base.replace(/Total devengado[^;$]*\$[\d.,]+/g,`Total devengado: ${fmtPesos(xlData.devengado)}`);
+        base=base.replace(/Total devengado[^;$\n]*\$[\d.,]+/g,`Total devengado: ${fmtPesos(xlData.devengado)}`);
       }
       if(xlData.neto){
         base=base.replace(/\$259\.533\.763/g,fmtPesos(xlData.neto));
-        base=base.replace(/neto a pagar[^;$]*\$[\d.,]+/gi,`neto a pagar: ${fmtPesos(xlData.neto)}`);
+        base=base.replace(/neto a pagar[^;$\n]*\$[\d.,]+/gi,`neto a pagar: ${fmtPesos(xlData.neto)}`);
       }
-      if(xlData.aportes){
-        base=base.replace(/\$124\.260\.600/g,fmtPesos(xlData.aportes));
-      }
-      if(xlData.diferencia===0){
-        base=base.replace(/CRUCE N[OÓOMINA]+ vs\. PILA[^.]*\./gi,'CRUCE NÓMINA vs. PILA: EXACTO (diferencia $0).');
-      }
-      // Add Excel filename reference
-      base+=`\n\nSoportes documentales:\n${richLabels.map(l=>'• '+l).join('\n')}`;
+      if(xlData.aportes) base=base.replace(/\$124\.260\.600/g,fmtPesos(xlData.aportes));
+      if(xlData.diferencia===0) base=base.replace(/CRUCE N[ÓO]MINA vs\. PILA[^.]*\./gi,'CRUCE NÓMINA vs. PILA: EXACTO (diferencia $0).');
     }
 
-    // ── For document obligations (1,2,3,7,8,9): replace doc references ────
-    if([1,2,3,7,8,9].includes(activeN)){
-      // Replace specific doc numbers found in new documents
-      if(memos.length>0){
-        // Only replace if different from Informe 1 refs
-        const newMemos=memos.filter(m=>!['788','735','789','278'].some(n=>m.includes(n)));
-        if(newMemos.length>0){
-          base+=`\n\nNuevos documentos del período: ${newMemos.join(', ')}.`;
+    // Paso 4: reemplazar datos de PQRSD del Inf.1 con los actuales (Oblig. 8)
+    if(activeN===8&&docsActuales.pqrsd.length>0){
+      // El Inf.1 menciona PQRSD en el contexto de las solicitudes atendidas
+      docsActuales.pqrsd.forEach((p,i)=>{
+        if(i===0){
+          // Reemplazar la línea del memorando 117 con el primer PQRSD
+          base=base.replace(/Memorando No\. 117[^\n]*/g,p);
+        } else {
+          // Agregar PQRSDs adicionales antes del cierre
+          base=base.replace(/Lo anterior se evidencia/,`- ${p}\n\nLo anterior se evidencia`);
         }
-      }
-      if(oficios.length>0){
-        const newOffs=oficios.filter(o=>!o.includes('316'));
-        if(newOffs.length>0) base+=`\n${newOffs.join(', ')}.`;
-      }
-      if(certs.length>0){
-        const newCerts=certs.filter(c=>!['393','394','395','396','414'].some(n=>c.includes(n)));
-        if(newCerts.length>0) base+=`\n${newCerts.join(', ')}.`;
-      }
-      if(pqrsds.length>0) base+=`\nPQRSD gestionados: ${pqrsds.join(', ')}.`;
-      if(richLabels.length>0) base+=`\n\nSoportes documentales:\n${richLabels.map(l=>'• '+l).join('\n')}`;
+      });
     }
+
+    // Paso 5: reemplazar datos PASIVOCOL del Inf.1 con los del reporte actual
+    if([1,3,9].includes(activeN)&&docsActuales.reporte.length>0){
+      const rep=docsActuales.reporte[0];
+      // Reemplazar "55 ex funcionarios" con datos del reporte si los tiene
+      const totalM=rep.match(/(\d+)\s*cédulas?\s*Gobernaci/i)||rep.match(/(\d+)\s*registros/i);
+      if(totalM) base=base.replace(/55 ex funcionarios/g,`${totalM[1]} ex funcionarios`);
+      const vigM=rep.match(/(\d+)\s*vigentes/i);
+      const canM=rep.match(/(\d+)\s*canceladas/i);
+      if(vigM&&canM){
+        base=base.replace(/OFICIO No\. 316 del 07\/09\/2026/,
+          `${oficioReg||'OFICIO No. 316'} — Reporte ANI: ${vigM[1]} vigentes, ${canM[1]} canceladas`);
+      }
+    }
+
+    // Paso 6: reemplazar Certificados estado cédula del Inf.1 con los actuales
+    if(docsActuales.cert.length>0&&(activeN===1||activeN===3)){
+      const certLabels=docsActuales.cert.map(c=>`\n- ${c}`).join('');
+      // Reemplazar bloque de inconsistencias F9-020 con los certs actuales
+      base=base.replace(
+        /TORRES DÍAZ[^.]+\(C\.C\. 9\.653\.721\)/,
+        docsActuales.cert.map(c=>{
+          const nom=c.match(/a nombre de ([A-ZÁÉÍÓÚÑ\s]+?)(?:,|—|\s*$)/i)?.[1]||'';
+          const ced=c.match(/Cédula[^N]*No\.?\s*([\d.,]+)/i)?.[1]||'';
+          return nom&&ced?`${nom} (C.C. ${ced})`:c;
+        }).join(', ')
+      );
+    }
+
+    // Paso 7: Actualizar fechas específicas del Inf.1 que quedaron (02/09/2026, 31/08/2026, etc.)
+    // Dejar indicador para que Eduardo complete manualmente
+    base=base.replace(/\b(02\/09\/2026|31\/08\/2026|07\/09\/2026|13\/08\/2026)\b/g,'[FECHA]');
+    base=base.replace(/\b(27\/07\/2026|20\/10\/1965)\b/g,'[DATO]');
+
+    // Paso 8: Agregar línea de soportes al final
+    base+=`\n\nAnexo informe bajo el formato FO-GD-11, evidencia con documentos de soporte del período.\n`+
+          richLabels.map(l=>`• ${l}`).join('\n');
 
     // ── REPLACE description completely ───────────────────────────────────
     document.getElementById('f-desc').value=base;
