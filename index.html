@@ -831,7 +831,7 @@ async function processFiles(files){
         }
         return [];
       })();
-      const hardTimeout=new Promise(res=>setTimeout(()=>res([]),25000));
+      const hardTimeout=new Promise(res=>setTimeout(()=>res([]),12000));
       pages=await Promise.race([convertPromise, hardTimeout]);
     }catch(e){
       console.warn('Conversión falló para '+file.name, e.message);
@@ -846,7 +846,7 @@ async function processFiles(files){
   if(processed.length>0){
     _fileQueue=[...processed];
     openNextInQueue();
-    if(processed.length>1) toast(`✓ ${processed.length} archivos procesados — asignando en secuencia`);
+    if(processed.length>1) toast(`✓ ${processed.length} archivos procesados`);
   }
 }
 
@@ -1406,15 +1406,15 @@ const INFORME1_REF = {
 
   3:`ACTIVIDAD No. 3:\n\nSe gestionó la consolidación de la documentación requerida para el proceso de cálculo actuarial del pasivo pensional (Ley 549 de 1999, Art. 9 y Decreto 1068 de 2015, numeral 2.12.3.6.3).\n\nSe elaboró y radicó el OFICIO No. 316 del 07/09/2026 a la Registraduría Nacional del Estado Civil, solicitando verificación y certificación de datos básicos de identidad de 55 ex funcionarios con inconsistencias irresolubles con archivos internos. Cargue PASIVOCOL: plazo máximo 25/10/2026.`,
 
-  4:`ACTIVIDAD No. 4:\n\nRevisión, verificación y validación técnica de la liquidación de nómina y prestaciones sociales:\n\nAdministración Central — Empleados Públicos (227 servidores): sueldo básico, primas (servicio, navidad, vacaciones), bonificación por servicios prestados, bonificación especial de recreación, gastos de representación. Normativa: Decreto 1042 de 1978 y Decreto 1919 de 2002.\n\nSecretaría de Infraestructura — Trabajadores Oficiales Banco de Maquinaria (75 servidores): sueldo básico, auxilio de transporte, subsidio de alimentación, prima de antigüedad (12%), prima de carestía (0,7 salarios), prima de clima (2 salarios), bonificación de servicio, cesantías y demás conceptos de la Convención Colectiva vigente. Total devengado: $283.607.674; neto a pagar: $259.533.763; aportes SSS y parafiscales: $124.260.600. CRUCE NÓMINA vs. PILA: EXACTO (diferencia $0). Certificación No. 414 (31/08/2026).\n\nActividades 4, 5 y 6 constituyen un proceso integrado e inseparable.`,
+  4:`ACTIVIDAD No. 4:\n\nDurante el período reportado, realicé la revisión, verificación y validación técnica de la liquidación de nómina y prestaciones sociales correspondiente al mes de [MES]:\n\nAdministración Central — Empleados Públicos ([N_EP] servidores): revisé el sueldo básico, primas de servicio, navidad y vacaciones, bonificación por servicios prestados, bonificación especial de recreación y gastos de representación, conforme al Decreto 1042 de 1978 y el Decreto 1919 de 2002.\n\nSecretaría de Infraestructura — Trabajadores Oficiales Banco de Maquinaria ([N_TO] servidores): validé el sueldo básico, auxilio de transporte, subsidio de alimentación, prima de antigüedad (12%), prima de carestía (0,7 salarios), prima de clima (2 salarios), bonificación de servicio, cesantías y demás conceptos de la Convención Colectiva vigente (Ley 6 de 1945 y Decretos-Ley 3135/68 y 1045/78). Total devengado [MES]: [DEVENGADO] | Neto a pagar: [NETO] | Aportes SSS y parafiscales: [APORTES] | Cruce NÓMINA vs. PILA: EXACTO — diferencia $0. Emití la [CERTIFICACION] el [FECHA_CERT].\n\nEl cruce de los ocho (8) subsistemas de aportes arrojó coincidencia exacta: Salud [S_SALUD], Pensión+FSP [S_PENSION], ARL [S_ARL], COMFACASANARE [S_COMFA], SENA [S_SENA], ICBF [S_ICBF], ESAP [S_ESAP] y MEN/Inst. Tec. [S_MEN] — total [APORTES], idéntico a lo reportado en la PILA.\n\nLideré el comité técnico de liquidación de nómina del [FECHA_COMITE] (convocado mediante [MEMORANDO_COMITE]), en el que participaron la abogada Mabel Lorena López Fory, la profesional Stefany Albarracín Robles (Infraestructura), la profesional Diana Carolina Cepeda Gómez y la directora Nini Jhoana Mariño Bernal (DTH).\n\nLas actividades 4, 5 y 6 constituyen un proceso integrado e inseparable: la depuración de la base gravable (6) alimenta la validación de conceptos (5), que a su vez sustenta la liquidación y certificación de la nómina (4).\n\nAnexo informe bajo el formato FO-GD-11, evidencia con fotos de las actividades realizadas.`,
 
-  5:`ACTIVIDAD No. 5:\n\nRevisión y validación de los conceptos que afectan la nómina:\n\n- Retención en la fuente: procedimientos 1 y 2 (Arts. 383, 385, 386 y 387 E.T., UVT 2026 = $52.374 — Resolución DIAN 000193 de 2026).\n- Aportes SSS: verificación IBC para salud, pensión y ARL. Para Trabajadores Oficiales del Banco de Maquinaria: nivel riesgo Clase V (obras civiles — ARL 6,96%).\n- Aportes parafiscales: SENA (0,5%), ICBF (3%), ESAP (0,5%), Institutos Técnicos MEN (1%) y COMFACASANARE (4%). Fundamento: Art. 65 Ley 1819 de 2016.\n- Deducciones, pagos salariales y no salariales: clasificación y cruce con novedades de personal.`,
+  5:`ACTIVIDAD No. 5:\n\nRevisión y validación de los conceptos que afectan la nómina de [MES]:\n\n- Retención en la fuente: procedimientos 1 y 2 (Arts. 383, 385, 386 y 387 E.T., UVT [ANIO] = $[UVT] — Resolución DIAN No. [RES_DIAN] de [ANIO]).\n- Aportes al Sistema de Seguridad Social: verificación del IBC para salud, pensión y ARL. Para los Trabajadores Oficiales del Banco de Maquinaria: nivel de riesgo Clase V (obras civiles — ARL 6,96%).\n- Aportes parafiscales: SENA (0,5%), ICBF (3%), ESAP (0,5%), Institutos Técnicos MEN (1%) y COMFACASANARE (4%). Fundamento: Art. 65 Ley 1819 de 2016.\n- Deducciones, pagos salariales y no salariales: clasificación y cruce con novedades de personal.\n\nLas actividades 4, 5 y 6 constituyen un proceso integrado e inseparable.\n\nAnexo informe bajo el formato FO-GD-11, evidencia con documentos de soporte del período.`,
 
-  6:`ACTIVIDAD No. 6:\n\nContribución en la depuración de la base gravable:\n\n- Procedimientos 1 y 2 de retención en la fuente: verificación de rentas exentas (Art. 206 E.T.) y deducciones del Art. 387 E.T.: dependientes (10% del ingreso bruto / máx. 32 UVT mes), intereses de vivienda (máx. 100 UVT mes), salud prepagada (máx. 16 UVT mes), aportes voluntarios AFC (Art. 126-4 E.T.) y fondos de pensiones voluntarios (Art. 126-1 E.T.).\n- Reunión de revisión del procedimiento de nómina PR-TH-02 con la abogada Diana Carolina Cepeda Gómez y Viky Velandia Albarracín.`,
+  6:`ACTIVIDAD No. 6:\n\nContribución en la depuración de la base gravable para la nómina de [MES]:\n\n- Procedimientos 1 y 2 de retención en la fuente: verificación de rentas exentas (Art. 206 E.T.) y deducciones del Art. 387 E.T.: dependientes (10% del ingreso bruto / máx. 32 UVT mes), intereses de vivienda (máx. 100 UVT mes), salud prepagada (máx. 16 UVT mes), aportes voluntarios AFC (Art. 126-4 E.T.) y fondos de pensiones voluntarios (Art. 126-1 E.T.).\n- Reunión de revisión del procedimiento de nómina PR-TH-02 con la abogada Diana Carolina Cepeda Gómez y Viky Velandia Albarracín.\n\nLas actividades 4, 5 y 6 constituyen un proceso integrado e inseparable: la depuración de la base gravable (6) alimenta la validación de conceptos (5), que a su vez sustenta la liquidación y certificación de la nómina (4).\n\nAnexo informe bajo el formato FO-GD-11, evidencia con documentos de soporte del período.`,
 
-  7:`ACTIVIDAD No. 7:\n\nDocumentos administrativos elaborados y proyectados en el período:\n\nPROCESOS PASIVOCOL:\n- OFICIO No. 316 (07/09/2026): Solicitud Registraduría Nacional — 55 ex funcionarios.\n- CERTIFICACIONES Nos. 393-396 (13/08/2026): tiempos de servicio CODERR F9-020.\n- MEMORANDO No. 788 (07/09/2026): remisión Secretaría de Hacienda — 4 certificaciones.\n\nINFRAESTRUCTURA:\n- MEMORANDO No. 735 (31/08/2026): convocatoria comité técnico nómina.\n- CERTIFICACIÓN No. 414 (31/08/2026): revisión nómina y aportes SSS — Banco de Maquinaria.\n\nCOMFACASANARE:\n- MEMORANDO No. 789 (07/09/2026): respuesta afiliaciones COMFACASANARE.`,
+  7:`ACTIVIDAD No. 7:\n\nDurante el período reportado, elaboré y proyecté los siguientes documentos administrativos en el marco de las funciones del contrato y del área de Talento Humano:\n\nPASIVOCOL:\n[DOCS_PASIVOCOL]\n\nINFRAESTRUCTURA:\n[DOCS_INFRA]\n\nCOMFACASANARE:\n[DOCS_COMFA]\n\nPENDIENTE: [PENDIENTE]\n\nAnexo informe bajo el formato FO-GD-11, evidencia con fotos de las actividades realizadas.`,
 
-  8:`ACTIVIDAD No. 8:\n\nEn cumplimiento de este punto, y en concordancia con lo ejecutado en las actividades anteriores, se dio respuesta oportuna, técnica y debidamente fundamentada a todas las solicitudes internas y externas recibidas durante el período:\n\n- Solicitud CETIL 7 funcionarios retirados: iniciado proceso con OFICIO No. 316.\n- MEMORANDO No. 117 Secretaría de Salud — afiliación COMFACASANARE: respondido mediante MEMORANDO No. 789.\n- Inconsistencia F9-952 AGUDELO RIVERO NANCY: coordinación con Registraduría Nacional — fecha confirmada.\n- Comité técnico nómina Secretaría de Infraestructura (02/09/2026): resolución de consultas IBC, parafiscales y ARL Clase V.`,
+  8:`ACTIVIDAD No. 8:\n\nDurante el período reportado, respondí de manera oportuna, técnica y debidamente fundamentada todas las solicitudes y requerimientos recibidos, tanto internos como externos:\n\n[SOLICITUDES]\n\nToda la evidencia de las gestiones anteriores consta en los memorandos, oficios, certificaciones y listas de asistencia relacionados en la Actividad 7.\n\nAnexo informe bajo el formato FO-GD-11, evidencia con fotos de las actividades realizadas.`,
 
   9:`ACTIVIDAD No. 9:\n\nEn cumplimiento de este punto, y en articulación con las Actividades 1, 2 y 3, se ejecutó de manera integral el procedimiento de gestión del aplicativo PASIVOCOL versión 6.0, garantizando la coherencia, oportunidad y confiabilidad de los datos suministrados al MHCP.\n\nTRAZABILIDAD DEL PROCESO:\n1. Descarga y análisis del informe oficial PASIVOCOL → identificación de inconsistencias CODERR F9-020 y F9-952.\n2. Elaboración certificaciones Nos. 393-396 → remisión Secretaría de Hacienda mediante MEMORANDO No. 788.\n3. Coordinación con Registraduría Nacional para subsanar F9-952.\n4. Elaboración OFICIO No. 316 → articulación con MEMORANDO No. 278 (CETIL).\n5. Preparación soportes para próximo cargue (plazo MHCP: 25/10/2026).`,
 
@@ -1854,22 +1854,56 @@ async function genDescription(){
     const memoComfa=docsActuales.memo.find(m=>/789|comfa/i.test(m))||docsActuales.memo[2]||'';
     if(memoComfa) base=base.replace(/MEMORANDO No\. 789/g, memoComfa.split(' — ')[0].split(' (')[0]);
 
-    // Paso 3: reemplazar datos de nómina del Inf.1 con datos Excel actuales
+    // ── Reemplazar marcadores [MES], [N_EP], [DEVENGADO], etc. ───────────
+    // Período y mes
+    base=base.replace(/\[MES\]/g, mesActual);
+    base=base.replace(/\[ANIO\]/g, (cfg.d||'2026').split(/[-\/]/)[2]||'2026');
+    base=base.replace(/\[UVT\]/g, '52.374'); // UVT 2026
+    base=base.replace(/\[RES_DIAN\]/g, '000193');
+
+    // Datos del Excel de nómina (oblig. 4,5,6)
     if([4,5,6].includes(activeN)&&xlData){
-      if(xlData.numServers){
-        base=base.replace(/\(75 servidores\)/g,`(${xlData.numServers} servidores)`);
-        base=base.replace(/\(227 servidores\)/g,`(${xlData.numServers} servidores)`);
-      }
-      if(xlData.devengado){
-        base=base.replace(/\$283\.607\.674/g,fmtPesos(xlData.devengado));
-        base=base.replace(/Total devengado[^;$\n]*\$[\d.,]+/g,`Total devengado: ${fmtPesos(xlData.devengado)}`);
-      }
-      if(xlData.neto){
-        base=base.replace(/\$259\.533\.763/g,fmtPesos(xlData.neto));
-        base=base.replace(/neto a pagar[^;$\n]*\$[\d.,]+/gi,`neto a pagar: ${fmtPesos(xlData.neto)}`);
-      }
-      if(xlData.aportes) base=base.replace(/\$124\.260\.600/g,fmtPesos(xlData.aportes));
-      if(xlData.diferencia===0) base=base.replace(/CRUCE N[ÓO]MINA vs\. PILA[^.]*\./gi,'CRUCE NÓMINA vs. PILA: EXACTO (diferencia $0).');
+      base=base.replace(/\[N_TO\]/g, xlData.numServers||'75');
+      base=base.replace(/\[N_EP\]/g, '227');
+      base=base.replace(/\[DEVENGADO\]/g, xlData.devengado?fmtPesos(xlData.devengado):'[DEVENGADO]');
+      base=base.replace(/\[NETO\]/g, xlData.neto?fmtPesos(xlData.neto):'[NETO]');
+      base=base.replace(/\[APORTES\]/g, xlData.aportes?fmtPesos(xlData.aportes):'[APORTES]');
+      // Subsistemas — si no tenemos el desglose, dejar marcadores
+      base=base.replace(/\[S_SALUD\]/g,'[Salud]');
+      base=base.replace(/\[S_PENSION\]/g,'[Pensión+FSP]');
+      base=base.replace(/\[S_ARL\]/g,'[ARL]');
+      base=base.replace(/\[S_COMFA\]/g,'[COMFACASANARE]');
+      base=base.replace(/\[S_SENA\]/g,'[SENA]');
+      base=base.replace(/\[S_ICBF\]/g,'[ICBF]');
+      base=base.replace(/\[S_ESAP\]/g,'[ESAP]');
+      base=base.replace(/\[S_MEN\]/g,'[MEN/Inst. Tec.]');
+      // Certificación de nómina
+      const certNom=docsActuales.cert.find(c=>/414|nom[oó]|banco|maquinaria/i.test(c))||docsActuales.cert[0]||'';
+      const certNum=(certNom.match(/No\.?\s*(\d+)/i)||[])[1]||'[NÚMERO]';
+      base=base.replace(/\[CERTIFICACION\]/g,`Certificación No. ${certNum}`);
+      base=base.replace(/\[FECHA_CERT\]/g,'[FECHA]');
+      // Comité técnico
+      const memoComite=docsActuales.memo.find(m=>/735|comit[eé]|infra/i.test(m))||docsActuales.memo[0]||'';
+      const memoNum=(memoComite.match(/No\.?\s*(\d+)/i)||[])[1]||'[NÚMERO]';
+      base=base.replace(/\[MEMORANDO_COMITE\]/g,`MEMORANDO No. ${memoNum}`);
+      base=base.replace(/\[FECHA_COMITE\]/g,'[FECHA]');
+    }
+
+    // Documentos por categoría (oblig. 7)
+    if(activeN===7){
+      const docsP=docsActuales.oficio.concat(docsActuales.cert.filter(c=>!/nom[oó]|banco|maquinaria/i.test(c)));
+      const docsI=docsActuales.cert.filter(c=>/nom[oó]|banco|maquinaria|infra/i.test(c)).concat(docsActuales.memo.filter(m=>/735|infra|comit/i.test(m)));
+      const docsC=docsActuales.memo.filter(m=>/789|comfa|salud/i.test(m));
+      base=base.replace(/\[DOCS_PASIVOCOL\]/g, docsP.length?docsP.map(d=>`• ${d}`).join('\n'):'• [DOCUMENTOS PASIVOCOL DEL PERÍODO]');
+      base=base.replace(/\[DOCS_INFRA\]/g, docsI.length?docsI.map(d=>`• ${d}`).join('\n'):'• [DOCUMENTOS INFRAESTRUCTURA DEL PERÍODO]');
+      base=base.replace(/\[DOCS_COMFA\]/g, docsC.length?docsC.map(d=>`• ${d}`).join('\n'):'• [DOCUMENTOS COMFACASANARE DEL PERÍODO]');
+      base=base.replace(/\[PENDIENTE\]/g,'[PENDIENTE DEL PERÍODO]');
+    }
+
+    // Solicitudes respondidas (oblig. 8)
+    if(activeN===8){
+      const solic=richLabels.map(l=>`• ${l}`).join('\n')||'• [SOLICITUDES ATENDIDAS EN EL PERÍODO]';
+      base=base.replace(/\[SOLICITUDES\]/g, solic);
     }
 
     // Paso 4: reemplazar datos de PQRSD del Inf.1 con los actuales (Oblig. 8)
