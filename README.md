@@ -24,6 +24,7 @@ Aplicación web (un solo archivo `index.html`) para preparar los informes mensua
 3. **✍️ Actividades:** en cada obligación, pulsar **✨ Generar**. La descripción sale del texto del Informe No. 1 con los datos del período nuevo. Lo que no se pudo sacar de los documentos queda entre corchetes, por ejemplo `[FECHA_COMITE]`; se completa a mano y luego se pulsa **💾 Guardar actividad**.
 4. **📅 Bitácora** (opcional): registro diario de actividades con su soporte.
 5. **⚡ Generar:** descargar el Excel, el Word Carta y el Acta FO-GD-11.
+6. **Al terminar el informe:** Config → **Iniciar siguiente informe** (descarga un respaldo, archiva el informe y deja la app lista para el próximo periodo).
 
 ## Archivos que acepta
 
@@ -50,7 +51,7 @@ Todo se guarda **en el navegador del equipo**: los datos de las actividades en l
 5. Esperar 1–2 minutos a que GitHub Pages publique (pestaña **Actions** → en verde ✓).
 6. Abrir la app y pulsar **Ctrl + Shift + R** en Edge para forzar la versión nueva.
 
-Para confirmar que se cargó la versión nueva: clic derecho → *Ver código fuente*. Debe aparecer `<!-- v40-carga-archivos-2026-10-20 -->` cerca del inicio.
+Para confirmar que se cargó la versión nueva: clic derecho → *Ver código fuente*. Debe aparecer `<!-- v42-guardar-actualizar-2026-10-21 -->` cerca del inicio.
 
 > Si GitHub Pages no está activo: **Settings → Pages → Source: Deploy from a branch → Branch: `main` / `(root)` → Save**.
 
@@ -61,6 +62,19 @@ Para confirmar que se cargó la versión nueva: clic derecho → *Ver código fu
 - Las plantillas (Excel, Word Carta, FO-GD-11) y los logos van incluidos dentro de `index.html`
 
 ## Versión
+
+**v42 (2026-10-21)** — Guardar, actualizar y siguiente informe
+- Botón **💾 Guardar** en el encabezado y autoguardado mientras se escribe (también al cerrar u ocultar la app).
+- Botón **🔄 Actualizar**: guarda y recarga la app con la última versión publicada.
+- Config → **Descargar respaldo / Restaurar respaldo**: copia completa en un archivo .json (actividades, configuración y soportes con sus imágenes).
+- Config → **Iniciar siguiente informe**: descarga un respaldo, archiva el informe actual en «Contratos guardados» y deja la app limpia con el periodo siguiente.
+
+**v41 (2026-10-21)** — Formatos idénticos a los originales
+- Acta Resumen sobre el formato oficial FO-GD-11 (encabezado, márgenes 2 cm, Arial 11, tabla, Compromisos, ASISTENTES y pie), con el contenido al estilo del Acta No. 1: sección por obligación, evidencia documental y pies «Ilustración N» numerados por Word.
+- Word del informe sobre el INFORME ACTIVIDADES No. 1: el estado financiero ahora es una tabla con los valores de cada pago.
+- Excel sobre el INFORME ACTIVIDADES No. 2: conserva tildes, ajusta el alto de filas y nombra la hoja «INF. No. N».
+- Los archivos abren en Word y Excel sin reparación.
+- Nuevos campos: pie de ilustración, páginas que van al Acta y obligación donde se muestra cada evidencia; anexos por actividad; contenido del Acta (tema, objetivo, metodología, hallazgos, compromisos); % de ejecución física.
 
 **v40 (2026-10-20)**
 - Corregido el bloqueo al cargar archivos: las imágenes se guardaban en localStorage y lo llenaban.
