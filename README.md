@@ -51,7 +51,7 @@ Todo se guarda **en el navegador del equipo**: los datos de las actividades en l
 5. Esperar 1–2 minutos a que GitHub Pages publique (pestaña **Actions** → en verde ✓).
 6. Abrir la app y pulsar **Ctrl + Shift + R** en Edge para forzar la versión nueva.
 
-Para confirmar que se cargó la versión nueva: clic derecho → *Ver código fuente*. Debe aparecer `<!-- v42-guardar-actualizar-2026-10-21 -->` cerca del inicio.
+Para confirmar que se cargó la versión nueva: clic derecho → *Ver código fuente*. Debe aparecer `<!-- v43-acta-original-archivo-2026-10-21 -->` cerca del inicio.
 
 > Si GitHub Pages no está activo: **Settings → Pages → Source: Deploy from a branch → Branch: `main` / `(root)` → Save**.
 
@@ -62,6 +62,12 @@ Para confirmar que se cargó la versión nueva: clic derecho → *Ver código fu
 - Las plantillas (Excel, Word Carta, FO-GD-11) y los logos van incluidos dentro de `index.html`
 
 ## Versión
+
+**v43 (2026-10-21)** — Acta igual al original e informes archivados
+- Acta FO-GD-11 idéntica al formato de la entidad: TEMA, LUGAR, OBJETIVO, AGENDA/ACTIVIDADES y DESARROLLO como lista numerada (sin filas adicionales).
+- Selector **Informe** en la barra superior: muestra número y mes de cada informe (en curso o archivado) y botón **➕ Nuevo informe**.
+- Informes archivados en **solo lectura**: se pueden revisar actividades y soportes y descargar el Excel, el Word y el Acta, pero no modificarlos.
+- Config → **Mes del informe** (automático según el periodo, editable).
 
 **v42 (2026-10-21)** — Guardar, actualizar y siguiente informe
 - Botón **💾 Guardar** en el encabezado y autoguardado mientras se escribe (también al cerrar u ocultar la app).
