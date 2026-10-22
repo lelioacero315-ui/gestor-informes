@@ -13,9 +13,9 @@ Aplicación web (un solo archivo `index.html`) para preparar los informes mensua
 
 | Archivo | Contenido |
 |---|---|
-| `INFORME_ACTIVIDADES_NoN_CTO1681_2026.xlsx` | Informe de actividades (pestaña "INF. No. 1", logo CONTRACTUS, escala 55 %) |
-| `INFORME_ACTIVIDADES_NoN_CTO1681_2026.docx` | Carta a la Secretaria General con la tabla ACTIVIDADES / ANEXOS |
-| `ACTA_RESUMEN_FO-GD-11_NoN_CTO1681_2026.docx` | Acta FO-GD-11 V.05 con las imágenes de evidencia incrustadas por obligación |
+| `INFORME ACTIVIDADES No. N.xlsx` | Informe de actividades (pestaña "INF. No. N", logo CONTRACTUS, escala 55 %) |
+| `INFORME ACTIVIDADES No. N.docx` | Carta a la Secretaria General con la tabla ACTIVIDADES / ANEXOS |
+| `ACTA RESUMEN FO-GD-11 No.N.docx` | Acta FO-GD-11 V.05 con las imágenes de evidencia incrustadas por obligación |
 
 ## Cómo se usa
 
@@ -24,7 +24,7 @@ Aplicación web (un solo archivo `index.html`) para preparar los informes mensua
 3. **✍️ Actividades:** en cada obligación, pulsar **✨ Generar**. La descripción sale del texto del Informe No. 1 con los datos del período nuevo. Lo que no se pudo sacar de los documentos queda entre corchetes, por ejemplo `[FECHA_COMITE]`; se completa a mano y luego se pulsa **💾 Guardar actividad**.
 4. **📅 Bitácora** (opcional): registro diario de actividades con su soporte.
 5. **⚡ Generar:** descargar el Excel, el Word Carta y el Acta FO-GD-11.
-6. **Al terminar el informe:** Config → **Iniciar siguiente informe** (descarga un respaldo, archiva el informe y deja la app lista para el próximo periodo).
+6. **Al terminar el informe:** **➕ Nuevo informe** (descarga un respaldo, archiva el informe y deja la app lista para el próximo periodo).
 
 ## Archivos que acepta
 
@@ -51,7 +51,7 @@ Todo se guarda **en el navegador del equipo**: los datos de las actividades en l
 5. Esperar 1–2 minutos a que GitHub Pages publique (pestaña **Actions** → en verde ✓).
 6. Abrir la app y pulsar **Ctrl + Shift + R** en Edge para forzar la versión nueva.
 
-Para confirmar que se cargó la versión nueva: clic derecho → *Ver código fuente*. Debe aparecer `<!-- v43-acta-original-archivo-2026-10-21 -->` cerca del inicio.
+Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v44 · 21/10/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v44-marca-version-2026-10-21 -->` cerca del inicio.
 
 > Si GitHub Pages no está activo: **Settings → Pages → Source: Deploy from a branch → Branch: `main` / `(root)` → Save**.
 
@@ -62,6 +62,10 @@ Para confirmar que se cargó la versión nueva: clic derecho → *Ver código fu
 - Las plantillas (Excel, Word Carta, FO-GD-11) y los logos van incluidos dentro de `index.html`
 
 ## Versión
+
+**v44 (2026-10-21)** — Marca de versión
+- Etiqueta con la versión y la fecha en el encabezado (ej. «v44 · 21/10/2026»).
+- Si hay una versión más nueva publicada en GitHub, la etiqueta se pone en amarillo y avisa que hay que pulsar 🔄 Actualizar.
 
 **v43 (2026-10-21)** — Acta igual al original e informes archivados
 - Acta FO-GD-11 idéntica al formato de la entidad: TEMA, LUGAR, OBJETIVO, AGENDA/ACTIVIDADES y DESARROLLO como lista numerada (sin filas adicionales).
