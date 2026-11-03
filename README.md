@@ -51,7 +51,7 @@ Todo se guarda **en el navegador del equipo**: los datos de las actividades en l
 5. Esperar 1–2 minutos a que GitHub Pages publique (pestaña **Actions** → en verde ✓).
 6. Abrir la app y pulsar **Ctrl + Shift + R** en Edge para forzar la versión nueva.
 
-Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v46 · 03/11/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v46-redaccion-por-soportes-2026-11-03 -->` cerca del inicio.
+Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v47 · 03/11/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v47-adicion-prorroga-1-2026-11-03 -->` cerca del inicio.
 
 > Si GitHub Pages no está activo: **Settings → Pages → Source: Deploy from a branch → Branch: `main` / `(root)` → Save**.
 
@@ -62,6 +62,12 @@ Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arr
 - Las plantillas (Excel, Word Carta, FO-GD-11) y los logos van incluidos dentro de `index.html`
 
 ## Versión
+
+**v47 (2026-11-03)** — Adición y Prórroga No. 1
+- Valor del contrato: $13.119.321,00 + adición $6.559.660,50 = $19.678.981,50 (CDP 2604061 del 27-10-2026). Nueva terminación: 18 de diciembre de 2026.
+- Estado financiero del Word: fila ADICIONAL, total, valor pagado y por ejecutar con la adición desde el Informe No. 3 (los informes 1 y 2 conservan el valor inicial). Los valores muestran centavos.
+- Ejecución automática = valor pagado ÷ valor total: 33,33 % / 66,67 % / 66,67 % / 88,89 % / 100 %.
+- Periodos: Informe 4 del 04/11 al 03/12 y Informe 5 del 04/12 al 18/12 (medio mes, $2.186.553,50). No se crea un informe después del 18/12.
 
 **v46 (2026-11-03)** — Descripción a partir de cada soporte
 - Cada actividad relata en prosa todos los soportes que tiene asignados (ya no repite textos del informe anterior ni lista nombres de archivo).
