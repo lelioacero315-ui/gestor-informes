@@ -7,7 +7,7 @@ Aplicación web (un solo archivo `index.html`) para preparar los informes mensua
 
 **App en línea:** https://lelioacero315-ui.github.io/gestor-informes/
 
-**Versión vigente: v47 · 03/11/2026** — Adición y Prórroga No. 1 (ver [Versión](#versión))
+**Versión vigente: v48 · 03/11/2026** — Resultados de la auditoría y antecedentes con la adición (ver [Versión](#versión))
 
 ---
 
@@ -74,7 +74,7 @@ Todo se guarda **en el navegador del equipo**: los datos de las actividades en l
 5. Esperar 1–2 minutos a que GitHub Pages publique (pestaña **Actions** → en verde ✓).
 6. Abrir la app y pulsar **Ctrl + Shift + R** en Edge para forzar la versión nueva.
 
-Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v47 · 03/11/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v47-adicion-prorroga-1-2026-11-03 -->` cerca del inicio.
+Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v48 · 03/11/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v48-resultados-auditoria-2026-11-03 -->` cerca del inicio.
 
 > Si GitHub Pages no está activo: **Settings → Pages → Source: Deploy from a branch → Branch: `main` / `(root)` → Save**.
 
@@ -85,6 +85,12 @@ Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arr
 - Las plantillas (Excel, Word Carta, FO-GD-11) y los logos van incluidos dentro de `index.html`
 
 ## Versión
+
+**v48 (2026-11-03)** — Resultados de la auditoría de nómina y antecedentes con la adición
+- Los libros de auditoría de nómina aportan sus resultados a las actividades 4, 5 y 6: servidores, devengado, novedades, conformes y por revisar en seguridad social, bases de parafiscales, retención reportada frente a la calculada, deducciones no aplicadas y descuentos sobre el tope (con aviso).
+- Los Excel se leen hoja por hoja (máx. 40.000 caracteres por hoja), para que las hojas de resumen del final no se pierdan.
+- Las imágenes de los Excel en el Acta muestran primero las hojas de resultados (RESUMEN, NÓMINA, LIQUIDACIÓN, PROC1) y no las de instrucciones.
+- Word del informe: desde el Informe No. 3, la tabla de antecedentes muestra el plazo de 4 meses y 15 días, la terminación del 18/12/2026 y el valor de $19.678.981,50.
 
 **v47 (2026-11-03)** — Adición y Prórroga No. 1
 - Valor del contrato: $13.119.321,00 + adición $6.559.660,50 = $19.678.981,50 (CDP 2604061 del 27-10-2026). Nueva terminación: 18 de diciembre de 2026.
