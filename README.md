@@ -21,7 +21,7 @@ Aplicación web (un solo archivo `index.html`) para preparar los informes mensua
 
 1. **⚙️ Config:** número de informe, fechas del período y fecha de radicación. Guardar.
 2. **📎 Docs:** arrastrar o seleccionar los soportes (se pueden cargar varios a la vez) y asignar cada uno a una o varias obligaciones.
-3. **✍️ Actividades:** en cada obligación, pulsar **✨ Generar**. La descripción sale del texto del Informe No. 1 con los datos del período nuevo. Lo que no se pudo sacar de los documentos queda entre corchetes, por ejemplo `[FECHA_COMITE]`; se completa a mano y luego se pulsa **💾 Guardar actividad**.
+3. **✍️ Actividades:** en cada obligación, pulsar **✨ Generar**. La descripción se redacta con las frases del Informe No. 1 y los datos de los soportes; los avisos en ámbar indican qué revisar. Luego se pulsa **💾 Guardar actividad**.
 4. **📅 Bitácora** (opcional): registro diario de actividades con su soporte.
 5. **⚡ Generar:** descargar el Excel, el Word Carta y el Acta FO-GD-11.
 6. **Al terminar el informe:** **➕ Nuevo informe** (descarga un respaldo, archiva el informe y deja la app lista para el próximo periodo).
@@ -51,7 +51,7 @@ Todo se guarda **en el navegador del equipo**: los datos de las actividades en l
 5. Esperar 1–2 minutos a que GitHub Pages publique (pestaña **Actions** → en verde ✓).
 6. Abrir la app y pulsar **Ctrl + Shift + R** en Edge para forzar la versión nueva.
 
-Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v44 · 21/10/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v44-marca-version-2026-10-21 -->` cerca del inicio.
+Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v45 · 02/11/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v45-redaccion-descripciones-2026-11-02 -->` cerca del inicio.
 
 > Si GitHub Pages no está activo: **Settings → Pages → Source: Deploy from a branch → Branch: `main` / `(root)` → Save**.
 
@@ -62,6 +62,12 @@ Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arr
 - Las plantillas (Excel, Word Carta, FO-GD-11) y los logos van incluidos dentro de `index.html`
 
 ## Versión
+
+**v45 (2026-11-02)** — Redacción de descripciones
+- El botón ✨ Generar redacta cada actividad con las frases del Informe No. 1, pero solo con los párrafos que tienen datos en los soportes: ya no quedan `[CORCHETES]` en el texto.
+- Lee el reporte de la Registraduría, los certificados de estado de cédula, oficios y memorandos (con su asunto), la nómina, la liquidación, la planilla PILA y los libros de retención por procedimiento 1.
+- Los avisos (archivos de otro mes, diferencias entre nómina, PILA, liquidación y retención) salen en ámbar debajo del botón, no dentro del texto.
+- La columna ANEXOS del Word y del Excel usa la descripción de cada soporte (ya no «Soporte»).
 
 **v44 (2026-10-21)** — Marca de versión
 - Etiqueta con la versión y la fecha en el encabezado (ej. «v44 · 21/10/2026»).
