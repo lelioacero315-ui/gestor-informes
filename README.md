@@ -7,6 +7,29 @@ Aplicación web (un solo archivo `index.html`) para preparar los informes mensua
 
 **App en línea:** https://lelioacero315-ui.github.io/gestor-informes/
 
+**Versión vigente: v47 · 03/11/2026** — Adición y Prórroga No. 1 (ver [Versión](#versión))
+
+---
+
+## Datos del contrato
+
+| Concepto | Valor |
+|---|---|
+| Contrato | SECOP II CAS-GEN-CDPSP-0120-2026 · No. interno 1681 de 2026-08-03 |
+| Acta de inicio | 4 de agosto de 2026 |
+| Valor inicial | $13.119.321,00 (3 cuotas de $4.373.107,00) |
+| Adición y Prórroga No. 1 | $6.559.660,50 · 1 mes y 15 días · CDP 2604061 del 27-10-2026 |
+| Valor total | $19.678.981,50 |
+| Terminación | 18 de diciembre de 2026 (antes: 3 de noviembre de 2026) |
+
+| Informe | Periodo | Valor del acta | Pagado acumulado | Ejecución |
+|---|---|---|---|---|
+| No. 1 | 04/08 – 03/09/2026 | $4.373.107,00 | $4.373.107,00 | 33,33 % |
+| No. 2 | 04/09 – 03/10/2026 | $4.373.107,00 | $8.746.214,00 | 66,67 % |
+| No. 3 | 04/10 – 03/11/2026 | $4.373.107,00 | $13.119.321,00 | 66,67 % (sobre el valor con la adición) |
+| No. 4 | 04/11 – 03/12/2026 | $4.373.107,00 | $17.492.428,00 | 88,89 % |
+| No. 5 | 04/12 – 18/12/2026 | $2.186.553,50 | $19.678.981,50 | 100 % |
+
 ---
 
 ## Qué genera
@@ -21,7 +44,7 @@ Aplicación web (un solo archivo `index.html`) para preparar los informes mensua
 
 1. **⚙️ Config:** número de informe, fechas del período y fecha de radicación. Guardar.
 2. **📎 Docs:** arrastrar o seleccionar los soportes (se pueden cargar varios a la vez) y asignar cada uno a una o varias obligaciones.
-3. **✍️ Actividades:** en cada obligación, pulsar **✨ Generar**. La descripción se redacta con las frases del Informe No. 1 y los datos de los soportes; los avisos en ámbar indican qué revisar. Luego se pulsa **💾 Guardar actividad**.
+3. **✍️ Actividades:** en cada obligación, pulsar **✨ Generar**. La descripción se redacta en prosa con el contenido de cada soporte asignado a esa obligación (radicados, fechas, personas, cifras); los avisos en ámbar indican qué revisar. Luego se pulsa **💾 Guardar actividad**.
 4. **📅 Bitácora** (opcional): registro diario de actividades con su soporte.
 5. **⚡ Generar:** descargar el Excel, el Word Carta y el Acta FO-GD-11.
 6. **Al terminar el informe:** **➕ Nuevo informe** (descarga un respaldo, archiva el informe y deja la app lista para el próximo periodo).
@@ -47,7 +70,7 @@ Todo se guarda **en el navegador del equipo**: los datos de las actividades en l
 1. Entrar a https://github.com/lelioacero315-ui/gestor-informes
 2. Pulsar **Add file → Upload files**.
 3. Arrastrar el `index.html` nuevo (y este `README.md`). GitHub reemplaza los archivos que tengan el mismo nombre.
-4. Escribir un mensaje, por ejemplo `v40 — carga de todo tipo de archivos`, y pulsar **Commit changes**.
+4. Escribir un mensaje, por ejemplo `v47 — Adición y Prórroga No. 1`, y pulsar **Commit changes**.
 5. Esperar 1–2 minutos a que GitHub Pages publique (pestaña **Actions** → en verde ✓).
 6. Abrir la app y pulsar **Ctrl + Shift + R** en Edge para forzar la versión nueva.
 
