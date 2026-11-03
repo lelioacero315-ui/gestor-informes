@@ -51,7 +51,7 @@ Todo se guarda **en el navegador del equipo**: los datos de las actividades en l
 5. Esperar 1–2 minutos a que GitHub Pages publique (pestaña **Actions** → en verde ✓).
 6. Abrir la app y pulsar **Ctrl + Shift + R** en Edge para forzar la versión nueva.
 
-Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v45 · 02/11/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v45-redaccion-descripciones-2026-11-02 -->` cerca del inicio.
+Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arriba a la izquierda (ej. **v46 · 03/11/2026**). Si aparece en amarillo «⬆ Hay versión nueva», pulsa **🔄 Actualizar**. También puedes hacer clic derecho → *Ver código fuente*. Debe aparecer `<!-- v46-redaccion-por-soportes-2026-11-03 -->` cerca del inicio.
 
 > Si GitHub Pages no está activo: **Settings → Pages → Source: Deploy from a branch → Branch: `main` / `(root)` → Save**.
 
@@ -62,6 +62,12 @@ Para confirmar que se cargó la versión nueva: mira la etiqueta de versión arr
 - Las plantillas (Excel, Word Carta, FO-GD-11) y los logos van incluidos dentro de `index.html`
 
 ## Versión
+
+**v46 (2026-11-03)** — Descripción a partir de cada soporte
+- Cada actividad relata en prosa todos los soportes que tiene asignados (ya no repite textos del informe anterior ni lista nombres de archivo).
+- Lee formatos nuevos: correo de la Registraduría (oficio, reporte, solicitud de complemento, fechas y plazo), CETIL, planillas de aportes «Planilla Resumen», libros de auditoría de nómina, actualización de aportante (ICBF/SENA) y respuestas de fondos de pensiones anexas a los oficios.
+- Actividades 5 y 6 sin frases fijas del Banco de Maquinaria cuando los soportes no son de esa nómina.
+- Avisos nuevos: .zip que no se leen, libros de auditoría sin valores calculados y soportes con fecha fuera del período.
 
 **v45 (2026-11-02)** — Redacción de descripciones
 - El botón ✨ Generar redacta cada actividad con las frases del Informe No. 1, pero solo con los párrafos que tienen datos en los soportes: ya no quedan `[CORCHETES]` en el texto.
